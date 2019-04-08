@@ -1,16 +1,16 @@
 // ==UserScript==
 // @name         MLBTSN Completed Orders Helper 19
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.8.1
+// @version      2019.4.8.4
 // @description  Summarize your completed orders - Go to page=0 to get all, or page=x to get last x pages of orders
 // @author       sreyemnayr
 // @match        https://mlb19.theshownation.com/community_market/orders/completed*
-// @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=686443
-// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=686733
+// @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=687482
+// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=687481
 
 // ==/UserScript==
 
-var currentVersion = "2019.4.8.1";
+var currentVersion = "2019.4.8.2";
 
 var changelog = [];
 

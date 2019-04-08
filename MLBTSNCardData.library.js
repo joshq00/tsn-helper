@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MLBTSNCardData
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.8.1
+// @version      2019.4.8.2
 // @description  Collects card data from xmlhttp response
 // @author       sreyemnayr
 // @grant        none
@@ -65,7 +65,7 @@ function filterOutliers(someArray) {
   iqr = q3 - q1;
   maxValue = q3 + iqr * 1.5;
   minValue = q1 - iqr * 1.5;
-  console.log(maxValue, minValue);
+  
   return values.filter((x) => (x >= minValue) && (x <= maxValue));
  // return values.filter((x) => (x <= maxValue));
 }
@@ -378,12 +378,9 @@ function cardData(b){
     var avgBuyNow = Math.round(filteredBuyNows.reduce(function(t,n){return t+n;},0) / filteredBuyNows.length);
     var avgSellNow = Math.round(filteredSellNows.reduce(function(t,n){return t+n;},0) / filteredSellNows.length);
     var avgProfit = Math.round((avgBuyNow - avgSellNow) * 0.9);
-        console.log(name);
-        console.log(avgBuyNow);
-        console.log(avgSellNow);
-        console.log(avgProfit);
+        
     var buyTrend = Math.round((1 - (avgBuyNow / buyNow)) * 100);
-    var sellTrend = Math.round((1 - (avgSellNow / sellNow)) * 100);
+    var sellTrend = Math.round((1 - (avgSellNow / sellNow)) * 100) * -1;
 
     sellNows.sort(function(a, b){return b-a;});
     buyNows.sort(function(a, b){return b-a;});
@@ -394,7 +391,8 @@ function cardData(b){
     var minBuyNow = Math.min(...buyNows);
     var profitGap = Math.round((minBuyNow - maxSellNow)*0.9);
     // ROI = Net Profit / Total Investment * 100
-    var roi = Math.round ( profitGap / ( sellNow + 1 ) ) * 100 ;
+    var roi = Math.round ( ( profitMargin / ( sellNow + 1 ) ) * 100 );
+    var roiAvg = Math.round ( ( avgProfit / avgSellNow ) * 100 );
 
     if (buyNow == 999999) {
        buyNow = maxBuyNow;
@@ -447,10 +445,13 @@ function cardData(b){
     var thisHourMinDate=moment.min(thisHourDates);
     var diffMins = moment().diff(minDate);
     //var thisHourDiffMins = Math.round( (now-thisHourMinDate) / 60000 );
-    var salesPerMinute = Math.round( ( ( dates.length / diffMins ) / 60000 )* 100 ) / 100;
+    var salesPerMinute = Math.round( ( ( dates.length / diffMins ) / 60000 ) * 100 ) / 100;
     var minutesPerSale = Math.round( ( ( diffMins / dates.length ) / 60000 ) * 100 ) / 100;
     var salesPerMinuteThisHour = Math.round( ( numHour / 60) * 100 ) / 100;
     var minutesPerSaleThisHour = Math.round( ( 60 / numHour ) * 100 ) / 100;
+    
+
+    var salesPerHour = Math.round( ( dates.length / ( diffMins  / 1000 / 60 / 60 ) ) * 100 ) / 100;
 
     var ppm = ( profitMargin / (minutesPerSale * 2) ).toFixed(2)
 
@@ -481,6 +482,7 @@ function cardData(b){
         'soldLastHour': numHour,
         'soldToday': numToday,
         'salesPerMinute': salesPerMinute,
+        'salesPerHour': salesPerHour,
         'minutesPerSale': minutesPerSale,
         'salesPerMinuteThisHour': salesPerMinuteThisHour,
         'minutesPerSaleThisHour': minutesPerSaleThisHour,
@@ -503,6 +505,7 @@ function cardData(b){
         'balance': balance,
         'history': { 'sales': sales, 'dates': dates, 'buyOrSales': buyOrSales },
         'roi': roi,
+        'avgRoi': roiAvg,
         'errors': [],
 
 

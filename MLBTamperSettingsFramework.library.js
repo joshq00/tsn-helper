@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MLBTSNTamperSettingsFramework 2019
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.8.1
+// @version      2019.4.8.4
 // @description  Reusable pieces for MLBTSN scripts
 // @author       sreyemnayr
 // @match        https://mlb19.theshownation.com/*
@@ -67,7 +67,7 @@ function showUpdates(currentVersion, changelog, scriptName) {
         }
         if ( version_gt(currentVersion, updateMessageSeen)) {
 
-            var updateDialog = doc.createElement('div');
+            var updateDialog = document.createElement('div');
             updateDialog.title = "MLBTSN Helper Update"
             var updateInnerHTML = '';
 
@@ -75,7 +75,7 @@ function showUpdates(currentVersion, changelog, scriptName) {
             
                 if( version_gt(checkVersion, updateMessageSeen ) )
                 {
-                    updateInnerHTML += `<h3>Changelog for v${currentVersion}</h3><ul>`;
+                    updateInnerHTML += `<h3>Changelog for v${checkVersion}</h3><ul>`;
                     for ( var change of changelog[checkVersion] ) {
                         updateInnerHTML += `<li>${change}</li>`;
                     }
@@ -127,11 +127,14 @@ schema = {
             "type": "string",
             "title": "[ Patron Feature ] Heat Factor",
             "description": "What property should gradient heat-mapping be based on?",
-            "default": "minutes per sale",
+            "default": "salesPerMinute",
             "enum": [
                 {"text": "Profit", "value": "profitMargin"},
                 {"text": "PPM: Potential Profit per Minute", "value": "ppm"},
-                {"text": "Popularity (minutes per sale)", "value": "salesPerMinute"},
+                {"text": "ROI: Return on Investment", "value": "roi"},
+                {"text": "Buy Factor: Trend vs historical average", "value": "buyTrend"},
+                {"text": "Sell Factor: Trend vs historical average", "value": "sellTrend"},
+                {"text": "Popularity (sales per hour)", "value": "salesPerHour"},
                 {"text": "Sellable #", "value": "sellable"},
                 {"text": "Profit Gap: Estimated historical buy/sell gap", "value": "profitGap"},
                 ],
@@ -140,25 +143,25 @@ schema = {
 
          },
         "hotness": {
-            "type": "integer",
+            "type": "number",
             "title": "Hotness",
             "description": "What level should be indicated as hot?",
-            "default": 100,
+            "default": 1,
             "required": true,
             },
         "warmness": {
-            "type": "integer",
+            "type": "number",
             "title": "[ Patron Feature ] Warmness",
             "description": "[ Patrons Only Feature ] What level should be indicated as warm?",
-            "default": 50,
+            "default": 0.5,
             "required": true,
             "readOnly": true
             },
         "coolness": {
-            "type": "integer",
+            "type": "number",
             "title": "[ Patron Feature ] Coolness",
             "description": "[ Patrons Only Feature ] What max level should be indicated as cool?",
-            "default": 20,
+            "default": 0.1,
             "required": true,
             "readOnly": true
             },
@@ -177,7 +180,7 @@ if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' || md5(settin
    // Settings for folks who said thanks or became patrons :)
    // or knew how to mess with the source code ;)
     for (var prop in schema.properties) {
-        console.log(prop);
+       
         if (schema.properties.hasOwnProperty(prop)) {
            schema.properties[prop].readOnly = false;
            schema.properties[prop].title = schema.properties[prop].title.replace("[ Patron Feature ] ","");
@@ -604,6 +607,14 @@ table tr:nth-child(2n) {
     background-color: rgba(79, 79, 47, 0.05);
 }
 
+thead th:nth-child(4n) {
+    border-right: 1px rgba(47, 79, 79, 0.05) solid; 
+}
+
+tr td:nth-child(4n) {
+    border-right: 1px white solid;
+}
+
 // 1st rule:
     thead > :first-child th, thead > :last-child th
     {
@@ -862,7 +873,7 @@ var toggle = function (elem) {
         // hijack toastr.warning to be able to intercept it for recaptcha crap
         let toastrJack = Object.assign({}, toastr);
         toastr.warning = function(e = undefined, t = undefined, n = undefined) {
-            console.log(e, t, n);
+            
             if(e != "Safe")
             {
                     document.getElementById('helperFrame').style.height = '100%';
