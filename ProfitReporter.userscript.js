@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MLB The Show Nation Profit Reporter
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.5.2
+// @version      2019.4.8.1
 // @description  Calculates the current profitability of a card and auto-fills the text box for Buy/Sell Orders with +/- 1 Stub.  DOES NOT AUTOMATE ORDERS AND NEVER WILL!
 // @author       sreyemnayr
 // @run-at       document-end
@@ -11,6 +11,18 @@
 // @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=686726
 
 // ==/UserScript==
+
+var currentVersion = "2019.4.8.1";
+
+var changelog = [];
+
+changelog["2019.4.8.1"] = ['Working on re-tooling toward using CM Helper logic - will add all data to card page when done', 
+                            'Stop removing images in iFrame - didn\'t have desired effect',
+                            'Buy/Sell chart shows all 200 historical orders now as well as a guess for which they were',
+                            ]
+
+
+showUpdates(currentVersion, changelog, 'ProfitReporter');
 
 function xpathToArray(xpath, context=document) {
     var result = document.evaluate(xpath, context);
@@ -29,7 +41,7 @@ function xpathToArray(xpath, context=document) {
 
     if ( inIframe() ) {
         toastr = window.top.toastr;
-        $('img').attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
+        // $('img').attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
 
         if ( $('.g-recaptcha').length > 0 )
         {

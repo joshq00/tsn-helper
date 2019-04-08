@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MLBTSN Completed Orders Helper 19
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.5.3
+// @version      2019.4.8.1
 // @description  Summarize your completed orders - Go to page=0 to get all, or page=x to get last x pages of orders
 // @author       sreyemnayr
 // @match        https://mlb19.theshownation.com/community_market/orders/completed*
@@ -10,9 +10,23 @@
 
 // ==/UserScript==
 
+var currentVersion = "2019.4.8.1";
 
+var changelog = [];
 
-console.log("Settings", settings);
+changelog["2019.4.8.1"] = ['Added TODAY running total']
+
+//changelog["2019.4.5.2"] = ['Recaptcha detection magic. Turn off the "show helper iframe" setting to see it in action'];
+
+changelog["2019.4.5.1"] = ['Added new heatmap features for patrons - be sure to check settings and save!',
+                       'Added patreon button to bottom of page for those who are interested in supporting development',
+                       'Adjusted table displays to make room for more data',
+                       'Started work on Recaptcha warnings to avoid problems',
+                       'Added stubs balance to the header - where it should be...',
+                       'Various style enhancements'];
+
+showUpdates(currentVersion, changelog, 'CompletedOrdersHelper');
+
 
 var allSales=[];
 var numPages = 0;

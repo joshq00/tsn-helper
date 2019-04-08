@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MLBTSNCardData
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.4.1
+// @version      2019.4.8.1
 // @description  Collects card data from xmlhttp response
 // @author       sreyemnayr
 // @grant        none
