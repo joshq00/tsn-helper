@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MLBTSNTamperSettingsFramework 2019
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.8.4
+// @version      2019.4.9.2
 // @description  Reusable pieces for MLBTSN scripts
 // @author       sreyemnayr
 // @match        https://mlb19.theshownation.com/*
@@ -79,14 +79,14 @@ function showUpdates(currentVersion, changelog, scriptName) {
         if ( version_gt(currentVersion, updateMessageSeen)) {
 
             var updateDialog = document.createElement('div');
-            updateDialog.title = "MLBTSN Helper Update"
+            updateDialog.title = "MLBTSN Helper Update - "+scriptName+" "+currentVersion;
             var updateInnerHTML = '';
 
             for (checkVersion in changelog) {
             
                 if( version_gt(checkVersion, updateMessageSeen ) )
                 {
-                    updateInnerHTML += `<h3>Changelog for v${checkVersion}</h3><ul>`;
+                    updateInnerHTML += `<h3>${checkVersion} changelog</h3><ul>`;
                     for ( var change of changelog[checkVersion] ) {
                         updateInnerHTML += `<li>${change}</li>`;
                     }
@@ -451,17 +451,15 @@ th[role=columnheader]:not(.no-sort):hover:after {
 }
 .glyphicon-refresh-animate {
     animation: spin .7s infinite linear;
-    -webkit-animation: spin2 .7s infinite linear;
-}
-
-@-webkit-keyframes spin2 {
-    from { -webkit-transform: rotate(0deg);}
-    to { -webkit-transform: rotate(360deg);}
+    padding: 0 0 0 0 !important;
+    margin: 0 0 0 0 !important;
+    transform-origin: center !important;
+    width: 13px; height: 13px;
 }
 
 @keyframes spin {
-    from { transform: scale(1) rotate(0deg);}
-    to { transform: scale(1) rotate(360deg);}
+    from { transform: rotate(0deg);}
+    to { transform: rotate(360deg);}
 }
 form.brutusin-form table, form.brutusin-form input, form.brutusin-form select, form.brutusin-form textarea{
     width: 99% !important;
@@ -568,6 +566,10 @@ button.remove{
    content: '\\e041';
 }
 
+.reload-icon:before {
+    content:'\\e0b3';
+}
+
 .check-icon, .circle-check-icon {
    color: #66FF66;
 }
@@ -618,33 +620,81 @@ table tr:nth-child(2n) {
     background-color: rgba(79, 79, 47, 0.05);
 }
 
-thead th:nth-child(4n) {
+thead th:nth-child(2n) {
     border-right: 1px rgba(47, 79, 79, 0.05) solid; 
 }
 
-tr td:nth-child(4n) {
+tr td:nth-child(2n) {
     border-right: 1px white solid;
 }
 
-// 1st rule:
-    thead > :first-child th, thead > :last-child th
-    {
-        position: sticky;
-        z-index: 1;
-    }
-//2nd rule
-    thead > :last-child th
-    {
-        top: 80px;
-    }
-//3rd rule
-    thead > :first-child th
-    {
-        top: 50px;
-    }
 
-tbody {
-   overflow: scroll;
+table.items-results-table thead {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+}
+
+table.items-results-table {
+    height: 100%;
+    min-height:500px;
+    max-width: 100%;
+    width: 100%;
+    position: relative;
+    margin: 0;
+}
+
+table.items-results-table td, table.items-results-table th {
+    min-width:50px;
+    max-width:50px;
+    width: 50px;
+    table-layout:fixed;
+    display:table-cell;
+}
+
+table.items-results-table td.long, table.items-results-table th.long {
+    min-width:100px;
+    max-width:100px;
+    width: 100px;
+
+}
+
+table.items-results-table td.short, table.items-results-table th.short {
+    min-width:20px;
+    max-width:20px;
+    width: 20px;
+}
+
+table.items-results-table tbody {
+    max-height: 100%;
+    overflow: scroll;
+    display: block;
+    margin-top: 48px;
+    margin-bottom:40px;
+
+}
+
+table.items-results-table td:last-child, table.items-results-table th:last-child {
+    width: 60px !important;
+}
+
+table.items-results-table tr td:nth-child(n+18), table.items-results-table thead th:nth-child(n+18) {
+    width: 20px !important;
+    overflow:hidden;
+    text-overflow: ellipsis;
+}
+
+table.items-results-table td a {
+    display:inline-block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.layout-inner .scrollable>div {
+    min-height: 500px;
+    overflow-y: hidden;
 }
 
 `);

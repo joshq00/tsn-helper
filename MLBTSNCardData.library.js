@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MLBTSNCardData
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.8.2
+// @version      2019.4.9.1
 // @description  Collects card data from xmlhttp response
 // @author       sreyemnayr
 // @grant        none
@@ -269,7 +269,8 @@ function cardData(b){
 
     var openBuys = 0;
     var openSells = 0;
-    var cancelButtons = [];
+    var cancelBuyButtons = [];
+    var cancelSellButtons = [];
     var buyOrdersHeader = $(b).find("th:contains('Order Date') ~ th:contains('Buy Order Price')")[0];
     var buyOrdersTable = null;
         if(buyOrdersHeader != null) {
@@ -289,7 +290,7 @@ function cardData(b){
                  winningBuy = true;
                 }
                 cancelButton.dataset["confirm"] = false
-                cancelButtons.push(cancelForm);
+                cancelBuyButtons.push(cancelForm);
                 openBuys++;
                 //console.log(cancelForm);
             }
@@ -316,7 +317,7 @@ function cardData(b){
                  winningSell = true;
                 }
                 cancelButton.dataset["confirm"] = false
-                cancelButtons.push(cancelForm);
+                cancelSellButtons.push(cancelForm);
                 openSells++;
                 //console.log(cancelForm);
             }
@@ -389,14 +390,17 @@ function cardData(b){
     var minSellNow = Math.min(...sellNows);
     var maxSellNow = Math.max(...sellNows);
     var minBuyNow = Math.min(...buyNows);
+    
+
+    if (buyNow == 999999) {
+       buyNow = maxBuyNow;
+       profitMargin = parseInt(buyNow * 0.90 - sellNow);
+    }
+
     var profitGap = Math.round((minBuyNow - maxSellNow)*0.9);
     // ROI = Net Profit / Total Investment * 100
     var roi = Math.round ( ( profitMargin / ( sellNow + 1 ) ) * 100 );
     var roiAvg = Math.round ( ( avgProfit / avgSellNow ) * 100 );
-
-    if (buyNow == 999999) {
-       buyNow = maxBuyNow;
-    }
 
 
     var numHour = 0;
@@ -497,7 +501,9 @@ function cardData(b){
         'sellTrend': sellTrend,
         'profitGap': profitGap,
         'ppm': ppm,
-        'cancelButtons': cancelButtons,
+        'cancelButtons': cancelBuyButtons + cancelSellButtons,
+        'cancelBuyButtons': cancelBuyButtons,
+        'cancelSellButtons': cancelSellButtons,
         'openBuys': openBuys,
         'openSells': openSells,
         'winningBuy': winningBuy,

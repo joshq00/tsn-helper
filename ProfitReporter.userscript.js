@@ -1,20 +1,22 @@
 // ==UserScript==
 // @name         MLB The Show Nation Profit Reporter
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.8.2
+// @version      2019.4.9.2
 // @description  Calculates the current profitability of a card and auto-fills the text box for Buy/Sell Orders with +/- 1 Stub.  DOES NOT AUTOMATE ORDERS AND NEVER WILL!
 // @author       sreyemnayr
 // @run-at       document-end
 // @match        https://mlb19.theshownation.com/community_market/listings/*
 // @grant        unsafeWindow
-// @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=687482
-// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=687481
+// @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=687788
+// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=687787
 
 // ==/UserScript==
 
-var currentVersion = "2019.4.8.2";
+var currentVersion = "2019.4.9.2";
 
 var changelog = [];
+
+changelog["2019.4.9.2"] = ['I am aware that some card data is gone. It is coming back tonight with style!'];
 
 changelog["2019.4.8.1"] = ['Working on re-tooling toward using CM Helper logic - will add all data to card page when done', 
                             'Stop removing images in iFrame - didn\'t have desired effect',

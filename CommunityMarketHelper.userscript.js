@@ -1,21 +1,28 @@
 // ==UserScript==
 // @name         MLB The Show Nation Community Market Helper 19
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.8.4
+// @version      2019.4.9.2
 // @description  Expand community market search pages to include all pages. More features coming soon.
 // @author       sreyemnayr
 // @match        https://mlb19.theshownation.com/community_market*
 // @exclude      https://mlb19.theshownation.com/community_market/listings/*
 // @exclude      https://mlb19.theshownation.com/community_market/orders/*
-// @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=687482
-// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=687481
+// @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=687788
+// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=687787
 
 // ==/UserScript==
 //var notified = false;
 
-var currentVersion = "2019.4.8.3";
+var currentVersion = "2019.4.9.2";
 
 var changelog = [];
+
+changelog["2019.4.9.2"] = ['A lot of styling stuff - fixed headers on tables',
+                            'Moved buy/sell cancels into the buy/sell column',
+                            'Refresh icons to tell you when something is happening',
+                            'Only refresh the item you just bought/purchased. Wait for interval for everything else.'];
+
+changelog["2019.4.9.1"] = ['Include default settings on updates (sorry, upgraders!)'];
 
 changelog["2019.4.8.3"] = ['Switched minutes per sale to sales per hour - better for heatmap',
                             'Added option for buy/sell factor and ROI on heatmap',
@@ -153,7 +160,7 @@ var notifiedSell = {};
 var helperFrame;
 var tables;
 var sort;
-
+/*
 var settings;
 if(localStorage.hasOwnProperty('tsn-settings')){
     settings = JSON.parse(localStorage.getItem('tsn-settings'));
@@ -164,11 +171,11 @@ else{
     settings.refreshInterval = 15;
     settings.refreshMarketInterval = 0;
     localStorage.setItem('tsn-settings',JSON.stringify(settings));
-}
+}*/
 
-function marketHelper(onlyFavorites=false){
+function marketHelper(onlyFavorites=false, specificTarget=''){
    // console.log("Debug1");
-    clearTimeout(myTimeout);
+    
    // console.log("Debug2");
 
 
@@ -176,10 +183,19 @@ function marketHelper(onlyFavorites=false){
     $('.item-name').css('width','20%');
 
     var cardSelector;
-    if(onlyFavorites) { cardSelector = $(tables).find('td:nth-child(1):has(.favorites-icon-active) ~ td:nth-child(3) a'); }
-    else { cardSelector = $(tables).find('td:nth-child(3) a'); }
-    var howMany = cardSelector.length;
-    var howManyDone = 0;
+    if(onlyFavorites) { 
+        clearTimeout(myTimeout); 
+        cardSelector = $(tables).find('td:nth-child(1):has(.favorites-icon-active) ~ td:nth-child(3) a'); 
+    }
+    else if (specificTarget != ''){
+        cardSelector = $(tables).find('td:nth-child(3) a[href="'+specificTarget+'"]');
+
+    } else { 
+        clearTimeout(myTimeout); 
+        cardSelector = $(tables).find('td:nth-child(3) a'); 
+    }
+        var howMany = cardSelector.length;
+        var howManyDone = 0;
 
     cardSelector.each(function(i){
 
@@ -187,6 +203,10 @@ function marketHelper(onlyFavorites=false){
         if (!firstTime[url]) {
             this.innerHTML = this.textContent.replace(" ","<br />")
         }
+
+        var imgTd = $(this).parent().parent().find('td:nth-child(2)');
+        imgTd[0].innerHTML = '<div class="reload-icon icon glyphicon-refresh-animate"></div>';
+
 
         var thisBuyNowPrice = "";
         var thisSellNowPrice = "";
@@ -268,42 +288,71 @@ function marketHelper(onlyFavorites=false){
                 $(this).parent().parent().css('background-color',bgcolor+' !important');
 
                 var favoriteTd = $(this).parent().parent().find('td:nth-child(1)');
+                favoriteTd[0].classList.add("short");
 
                 $(favoriteTd[0]).attr("data-sort", $(favoriteTd[0]).find('.favorites-icon-active').length > 0 ? 1 + parseFloat(card.ppm * 0.00001).toFixed(5) : parseFloat(card.ppm * 0.00001).toFixed(5));
 
                 var imgTd = $(this).parent().parent().find('td:nth-child(2)');
+                imgTd[0].classList.add("short");
+
                 imgTd[0].innerHTML = '';
 
+                var nameTd = $(this).parent().parent().find('td:nth-child(3)');
+                nameTd[0].classList.add("long");
+
+                var ovrTd = $(this).parent().parent().find('td:nth-child(4)');
+                ovrTd[0].classList.add("short");
+                ovrTd[0].innerHTML = `<img src="${card.shield}" height="16px" width="16px">`;
 
 
-                for ( var cancelButton of card.cancelButtons ) {
-                    $(imgTd).append(cancelButton);
-                    cancelButton.target = "helperFrame"
-                }
+
+                
 
                 var buyTd = $(this).parent().parent().find('td:nth-child(5)');
                 buyTd[0].innerHTML = card.buyNow;
+                buyTd[0].classList.add("long");
                 $(buyTd).attr("data-sort", card.buyNow);
                 if (card.sellable > 0) {
                 buyTd.append(card.sellForm);
                 var sellButton = $(card.sellForm).find("button")[0];
+                sellButton.addEventListener("click", function(){
+                    imgTd[0].innerHTML = '<div class="reload-icon icon glyphicon-refresh-animate"></div>';
+                });
                 sellButton.innerHTML = "+S";
                 sellButton.style.padding = "1px";
                 sellButton.style.height = "100%"
                 var sellInput = $(card.sellForm).find("input#price")[0];
                 sellInput.style.padding = "0px";
                 }
+                for ( var cancelButton of card.cancelSellButtons ) {
+                    $(buyTd).append(cancelButton);
+                    cancelButton.target = "helperFrame";
+                    cancelButton.addEventListener("click", function(){
+                        imgTd[0].innerHTML = '<div class="reload-icon icon glyphicon-refresh-animate"></div>';
+                    });
+                }
 
                 var sellTd = $(this).parent().parent().find('td:nth-child(6)');
                 sellTd[0].innerHTML = card.sellNow;
+                sellTd[0].classList.add("long");
                 $(sellTd).attr("data-sort", card.sellNow);
                 sellTd.append(card.buyForm);
                 var buyButton = $(card.buyForm).find('button')[0]
+                buyButton.addEventListener("click", function(){
+                    imgTd[0].innerHTML = '<div class="reload-icon icon glyphicon-refresh-animate"></div>';
+                });
                 buyButton.innerHTML = "+B";
                 buyButton.style.padding = "1px";
                 buyButton.style.height = "100%"
                 var buyInput = $(card.buyForm).find("input#price")[0];
                 buyInput.style.padding = "0px";
+                for ( var cancelButton of card.cancelBuyButtons ) {
+                    $(sellTd).append(cancelButton);
+                    cancelButton.target = "helperFrame";
+                    cancelButton.addEventListener("click", function(){
+                        imgTd[0].innerHTML = '<div class="reload-icon icon glyphicon-refresh-animate"></div>';
+                    });
+                }
 
                 var profitTd = $(this).parent().parent().find('td:nth-child(7)');
                 profitTd[0].innerHTML = card.profitMargin;
@@ -355,13 +404,16 @@ function marketHelper(onlyFavorites=false){
 
                 var avgRoiTd = $(this).parent().parent().find('td:nth-child(18)');
                 avgRoiTd[0].innerHTML = card.avgRoi;
-                }
 
                 var brandTd = $(this).parent().parent().find('td:nth-child(19)');
                 $(brandTd).attr("data-sort", brandTd[0].textContent);
                 brandTd[0].innerHTML = replaceBulk(brandTd[0].innerHTML, findReplaceSeries);
                 brandTd[0].innerHTML = replaceBulk(brandTd[0].innerHTML, findReplaceBrands);
 
+                
+            }
+
+                
 
                 //$(theForm).css('width','50%');
                 $(card.buyForm).css('display','flex');
@@ -380,9 +432,11 @@ function marketHelper(onlyFavorites=false){
 
 
         if (howManyDone == howMany) {
+            
             sort.refresh();
-            setRefresh();
-        }
+            
+            if (specificTarget == '' ) { setRefresh(); }
+            }
             }
         });
 
@@ -394,9 +448,18 @@ function orderHelper(){
     //$('.helperDiv').remove();
     toastr.clear();
     var table_headers = $('.items-results-table thead')[0];
-    $(table_headers).find('th:nth-child(4)')[0].innerHTML = "OVR";
+    $(table_headers).find('th:nth-child(1)')[0].classList.add("short");
+    $(table_headers).find('th:nth-child(2)')[0].classList.add("short");
+    $(table_headers).find('th:nth-child(3)')[0].classList.add("long");
+
+    $(table_headers).find('th:nth-child(4)')[0].innerHTML = "";
+    $(table_headers).find('th:nth-child(4)')[0].classList.add("short");
+
     $(table_headers).find('th:nth-child(5)')[0].innerHTML = "SELL";
+    $(table_headers).find('th:nth-child(5)')[0].classList.add("long");
+
     $(table_headers).find('th:nth-child(6)')[0].innerHTML = "BUY";
+    $(table_headers).find('th:nth-child(6)')[0].classList.add("long");
     $(table_headers).find('th:nth-child(7)')[0].innerHTML = "";
     $(table_headers).find('th:nth-child(8)')[0].innerHTML = "";
 
@@ -429,11 +492,11 @@ function orderHelper(){
     tables = $('.items-results-table tbody')[0];
     if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                   md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
-    $(tables).find('tr td:nth-child(6)').after("<td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>");
+        $(tables).find('tr td:nth-child(6)').after("<td>0</td>".repeat(12));
     }
     else
     {
-        $(tables).find('tr td:nth-child(6)').after("<td>0</td><td>0</td>");
+        $(tables).find('tr td:nth-child(6)').after("<td>0</td>".repeat(3));
     }
     //$(tables).find('tr td:nth-child(2) img').each( function(i) {
     //    $(this).src("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
@@ -477,11 +540,11 @@ function orderHelper(){
 
                 if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                   md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
-                    $(tr).find('td:nth-child(6)').after("<td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td><td>0</td>");
+                    $(tr).find('td:nth-child(6)').after("<td>0</td>".repeat(12));
                 }
                 else
                 {
-                    $(tr).find('td:nth-child(6)').after("<td>0</td><td>0</td><td>0</td>");
+                    $(tr).find('td:nth-child(6)').after("<td>0</td>".repeat(3));
                 }
                 tables.append(tr);
             }
@@ -554,7 +617,9 @@ var refreshInterval = interval ? interval : settings.refreshMarketInterval * 100
     $('.sidebar-section-top-inner').append(helperFrame);
     helperFrame.onload = function(){
                       //  toastr["success"]("Order created","Done!");
-                        marketHelper(true);
+                      
+                      marketHelper(false, this.contentDocument.location.pathname);
+
 
                         }
 
