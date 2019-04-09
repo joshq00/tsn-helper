@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MLB The Show Nation Profit Reporter
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.9.2
+// @version      2019.4.9.3
 // @description  Calculates the current profitability of a card and auto-fills the text box for Buy/Sell Orders with +/- 1 Stub.  DOES NOT AUTOMATE ORDERS AND NEVER WILL!
 // @author       sreyemnayr
 // @run-at       document-end
@@ -12,11 +12,12 @@
 
 // ==/UserScript==
 
-var currentVersion = "2019.4.9.2";
+var currentVersion = "2019.4.9.3";
 
 var changelog = [];
 
-changelog["2019.4.9.2"] = ['I am aware that some card data is gone. It is coming back tonight with style!'];
+changelog["2019.4.9.3"] = ['Lots of card sale data is now on the top of the page.',
+                        'X hotkey to cancel outbid works again!'];
 
 changelog["2019.4.8.1"] = ['Working on re-tooling toward using CM Helper logic - will add all data to card page when done', 
                             'Stop removing images in iFrame - didn\'t have desired effect',
@@ -156,13 +157,38 @@ function checkBuyOrders() {
     var card = cardData(document.documentElement.innerHTML);
 
 function moveBuyForm() {
-	page.getElementsByClassName("title-layout-main")[0].prepend(card.buyForm);
+    var buysDiv = document.createElement('div');
+    buysDiv.style.display = "flex";
+    buysDiv.innerHTML = "<h3 style='color:white; margin-right: 12px;'>BUY</h3>";
+    
+    buysDiv.append(card.buyForm);
+	page.getElementsByClassName("title-layout-main")[0].prepend(buysDiv);
     $(card.buyForm).find('button')[0].innerHTML = "Create Buy Order";
+    card.buyFormButton = $(card.buyForm).find('button')[0];
+    for (var cancelButton of card.cancelBuyButtons) {
+        buysDiv.append(cancelButton);
+        if ($(cancelButton).find('button')[0].style.backgroundColor == "red") {
+            cancelTarget = $(cancelButton).find('button')[0];
+        }
+        
+    }
 }
 
-function moveSellForm() {
-	page.getElementsByClassName("title-layout-main")[0].prepend(card.sellForm);
+function moveSellForm(sellable=0) {
+    var sellsDiv = document.createElement('div');
+    sellsDiv.style.display = "flex";
+    sellsDiv.innerHTML = "<h3 style='color:white; margin-right: 12px;'>SELL</h3>";
+    
+    if(sellable > 0) { sellsDiv.append(card.sellForm); }
+	page.getElementsByClassName("title-layout-main")[0].prepend(sellsDiv);
     $(card.sellForm).find('button')[0].innerHTML = "Create Sell Order";
+    card.sellFormButton = $(card.sellForm).find('button')[0];
+    for (var cancelButton of card.cancelSellButtons) {
+       sellsDiv.append(cancelButton);
+       if ($(cancelButton).find('button')[0].style.backgroundColor == "red") {
+        cancelTarget = $(cancelButton).find('button')[0];
+    }
+    }
 }
 
 function moveForms() {
@@ -249,25 +275,95 @@ document.addEventListener('keyup', doc_keyUp, false);
     // $(li).css('display','flex');
     // $(li).css('float','left');
 
+    var cardDataDiv = document.createElement('div');
+   cardDataDiv.style.color = 'white';
+   cardDataDiv.style.backgroundColor = 'rgba(0,0,0,0.8)';
+   var dataPoints = {
+        
+        'quickSellValue': "QuickSell",
+        'profitMargin': "Profit",
+        'exchangeValue': "Exchange",
+        'soldLastHour': "Last Hour",
+        'soldToday': "Today",
+        'salesPerMinute': "Sales/min",
+        'salesPerHour': "Sales/hour",
+        'minutesPerSale': "Min/sale",
+        'salesPerMinuteThisHour': "S/M this hour",
+        'maxBuyNow': "Sell Max",
+        'minBuyNow': "Sell Min",
+        'minSellNow': "Buy Min",
+        'maxSellNow': "Buy Max",
+        'avgBuyNow': "Sell Avg",
+        'avgSellNow': "Buy Avg",
+        'avgProfit': "Avg Profit",
+        'buyTrend': "Buy factor",
+        'sellTrend': "Sell factor",
+        'profitGap': "GAP",
+        'ppm': "PPM",
+        'roi': "ROI",
+        'avgRoi': "Avg ROI"
+    }
+
+    var dataColors = {
+        
+        'quickSellValue': "orange",
+        'profitMargin': "green",
+        'exchangeValue': "orange",
+        'soldLastHour': "yellow",
+        'soldToday': "yellow",
+        'salesPerMinute': "yellow",
+        'salesPerHour': "yellow",
+        'minutesPerSale': "yellow",
+        'salesPerMinuteThisHour': "yellow",
+        'maxBuyNow': "blue",
+        'minBuyNow': "blue",
+        'minSellNow': "blue",
+        'maxSellNow': "blue",
+        'avgBuyNow': "blue",
+        'avgSellNow': "blue",
+        'avgProfit': "green",
+        'buyTrend': "yellow",
+        'sellTrend': "yellow",
+        'profitGap': "green",
+        'ppm': "green",
+        'roi': "green",
+        'avgRoi': "yellow"
+    }
+
+    var cardDataRows = '';
+
+    for (var prop in dataPoints) {
+        cardDataRows += `
+        <div class="player-attr-box">
+        <div class="player-attr-name player-attr-name-${dataColors[prop]}">${dataPoints[prop]}</div>
+        <div class="player-attr-number">${card[prop]}</div>
+        </div>`
+    }
+
+   cardDataDiv.innerHTML = '<div class="player-attr-row">'+cardDataRows+'</div>';
+
+
+page.getElementsByClassName("title-layout-main")[0].prepend(cardDataDiv);
+
     moveBuyForm();
-    if (card.sellable > 0) {
-    moveSellForm(); }
+    
+    moveSellForm(card.sellable); 
 
     for ( var button of document.querySelectorAll("button[data-confirm='Are you sure?'") ) { button.dataset["confirm"] = false }
 
-    for ( var table of Array.from(document.querySelectorAll(".title-widget-main table")).slice(0,-2) ) { mainHeading.prepend(table); table.style.backgroundColor = "white"; table.style.color = "black"; }
+    // for ( var table of Array.from(document.querySelectorAll(".title-widget-main table")).slice(0,-2) ) { mainHeading.prepend(table); table.style.backgroundColor = "white"; table.style.color = "black"; }
 
     mainHeading.prepend(document.querySelector(".currency-widget-inner"));
 
     var buyOrdersTitle = document.evaluate("//th[contains(.,'Order Date')]/following-sibling::th[contains(.,'Buy Order Price')]").iterateNext()
     if (buyOrdersTitle != null) { var buyEl = document.createElement("small");
-                                  buyEl.innerText=" ( " + card.sellPrice + " ) "
+                                  buyEl.innerText=" ( " + card.buyNow + " ) "
                                   buyOrdersTitle.appendChild(buyEl);
                                 }
 
     var sellOrdersTitle = document.evaluate("//th[contains(.,'Order Date')]/following-sibling::th[contains(.,'Sell Order Price')]").iterateNext()
     if (sellOrdersTitle != null) { var sellEl = document.createElement("small");
-                                  sellEl.innerText=" ( " + card.buyPrice + " ) "
+                                  sellEl.innerText=" ( " + card.sellNow + " ) "
                                   sellOrdersTitle.appendChild(sellEl);
                                  }
 
@@ -304,15 +400,8 @@ document.addEventListener('keyup', doc_keyUp, false);
     //if ($('.toast').find('.toast-message')[0].innerHTML == 'reCAPTCHA failed.'){
    // $('#create-buy-order-form').find('button').click();
    // }
-var settings = {}
-if(localStorage.hasOwnProperty('tsn-settings')){
-   settings = JSON.parse(localStorage.getItem('tsn-settings'));
-    
-   }
-else{
-    settings.refreshInterval = 0;
-    localStorage.setItem('tsn-settings',JSON.stringify(settings));
-}
+
+   
 
     if(settings.refreshInterval > 0 && ! inIframe()) {
 setTimeout(function(){ window.location.reload(); }, (1000*parseInt(settings.refreshInterval))); // 1000 * seconds [(60) * minutes ]
