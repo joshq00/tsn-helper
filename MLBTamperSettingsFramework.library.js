@@ -41,21 +41,32 @@ function addStyle(css) {
 function inIframe () {  try { return window.self !== window.top; } catch (e) { return true; } };
 
 
+var settings_defaults = { 
+    "refreshInterval": 60, 
+    "heatFactor": "roi", 
+    "hotness": 100, 
+    "warmness": 30, 
+    "coolness": 10, 
+    "superSecret": "", 
+    "refreshMarketInterval": 60, 
+    "showBuyFrame": false, 
+    "ignoreSoloBuySell": false, 
+     }
+
 // Get/init localStorage settings
 var settings = {};
 if(localStorage.hasOwnProperty('tsn-settings')){
    settings = JSON.parse(localStorage.getItem('tsn-settings'));
-    if (! settings.superSecret ) {
-        settings.superSecret = '';
-        settings.superSecretMd5 = md5('');
-    }
    }
-else{
-    settings.refreshInterval = 15;
-    settings.superSecret = '';
-    settings.superSecretMd5 = md5('');
-    localStorage.setItem('tsn-settings',JSON.stringify(settings));
-}
+
+for (var prop in settings_defaults) {
+    if ( !settings.hasOwnProperty(prop) )
+    {
+        settings[prop] = settings_defaults[prop]
+    }
+} 
+settings.superSecretMd5 = md5(settings.superSecret);
+localStorage.setItem('tsn-settings',JSON.stringify(settings));
 
 function showUpdates(currentVersion, changelog, scriptName) {
     var updateMessageSeen = 0;
