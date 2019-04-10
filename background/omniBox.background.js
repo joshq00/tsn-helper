@@ -26,7 +26,7 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
         var entries = json;
         console.log("Debug Current Request", entries);
   
-        for (var i = 0, entry; i < 5 && (entry = entries[i]); i++) {
+        for (var i = 0, entry; i < 10 && (entry = entries[i]); i++) {
           var path = entry.url;
           //var line =
           //    entry.getElementsByTagName("match")[0].getAttribute("lineNumber");
@@ -37,7 +37,7 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
   
           var description = '<url>' + entry.url + '</url>';
          
-            description += ' <dim>' + template_split[3] + '</dim>';
+            description += ' <dim>' + template_split.filter(function(e){ return e != '' }).join(" | ").replace(new RegExp(text,"gi"), "<match>$&</match>") + '</dim>';
           
   
           results.push({
