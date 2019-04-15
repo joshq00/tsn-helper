@@ -35,10 +35,10 @@ chrome.omnibox.onInputChanged.addListener(function(text, suggest) {
           var regex1 = /<[^>]+>/;
           var template_split = template.split(regex1);
   
-          var description = '<url>' + entry.url + '</url>';
+           
          
-            description += ' <dim>' + template_split.filter(function(e){ return e != '' }).join(" | ").replace(new RegExp(text,"gi"), "<match>$&</match>") + '</dim>';
-          
+            var description = ' <dim>' + template_split.filter(function(e){ return e != '' }).join(" | ").replace(new RegExp(text,"gi"), "<match>$&</match>") + '</dim>';
+            //description += '<url>' + entry.url + '</url>';
   
           results.push({
             content: entry.url ,

@@ -1,19 +1,21 @@
 // ==UserScript==
 // @name         MLBTSN Completed Orders Helper 19
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.15.1
+// @version      2019.4.15.2
 // @description  Summarize your completed orders - Go to page=0 to get all, or page=x to get last x pages of orders
 // @author       sreyemnayr
 // @match        https://mlb19.theshownation.com/community_market/orders/completed*
 // @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=689601
-// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=689602
+// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=689639
 // ==/UserScript==
 
-var currentVersion = "2019.4.9.2";
+var currentVersion = "2019.4.15.2";
 
 var changelog = [];
 
-changelog["2019.4.8.1"] = ['Added TODAY running total']
+changelog["2019.4.15.2"] = ['Linked in for historical buys magic.'];
+
+changelog["2019.4.8.1"] = ['Added TODAY running total'];
 
 //changelog["2019.4.5.2"] = ['Recaptcha detection magic. Turn off the "show helper iframe" setting to see it in action'];
 
@@ -90,6 +92,14 @@ var doneNum = 0;
 var runningTotal=0;
     var runningProfitTotal=0;
 
+    var localDataBuys = {};
+            
+                if(localStorage.hasOwnProperty('tsn-purchaseHistory')){
+                    localDataBuys = JSON.parse(localStorage.getItem('tsn-purchaseHistory'));
+                    }
+                 
+                 localStorage.setItem('tsn-purchaseHistory',JSON.stringify(localDataBuys));
+
     var todayProfitTotal=0;
 
     //$('.inventory-list img').hide();
@@ -124,10 +134,10 @@ var runningTotal=0;
 
             getLinks(b);
             doneNum = doneNum + 1;
-            console.log(doneNum, numPages);
-            //var team =
+            
             if(doneNum == numPages - 1){
             //console.log(allSales);
+            
                 for (var key in allSales){
                     var i = allSales[key];
                     var numBuys = i.buys.length;
@@ -150,7 +160,11 @@ var runningTotal=0;
                     $('#inventory-table-body').append(tabularData); }
                     runningTotal = runningTotal + (sellsTotal-buysTotal);
                     runningProfitTotal = runningProfitTotal - buysTotal + sellsTotal;
+                    if (numBuys > 0 ) {
+                        localDataBuys[key] = {"date": i.mostRecentBuy, "amount": i.buys[0]}
+                    }
                 }
+                localStorage.setItem('tsn-purchaseHistory',JSON.stringify(localDataBuys));
                 //$('#inventory-table-body').append(fragment);
                 sort = new Tablesort(document.getElementById('inventory-table'), { descending: true });
                 //$('#inventory-table').floatThead();

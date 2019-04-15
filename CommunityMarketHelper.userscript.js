@@ -1,21 +1,23 @@
 // ==UserScript==
 // @name         MLB The Show Nation Community Market Helper 19
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.15.2
+// @version      2019.4.15.3
 // @description  Expand community market search pages to include all pages. More features coming soon.
 // @author       sreyemnayr
 // @match        https://mlb19.theshownation.com/community_market*
 // @exclude      https://mlb19.theshownation.com/community_market/listings/*
 // @exclude      https://mlb19.theshownation.com/community_market/orders/*
 // @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=689601
-// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=689602
+// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=689639
 
 // ==/UserScript==
 //var notified = false;
 
-var currentVersion = "2019.4.15.2";
+var currentVersion = "2019.4.15.3";
 
 var changelog = [];
+
+changelog["2019.4.15.3"] = ['Some fixes for the notifications - last update before Chrome Extension',]
 
 changelog["2019.4.15.2"] = ['BIG updates!',
                             'Order information in the navbar',

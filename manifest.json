@@ -46,7 +46,8 @@
             "https://mlb19.theshownation.com/community_market*"
           ],
         "exclude_globs": [
-          "https://mlb19.theshownation.com/community_market/listings/*"
+          "https://mlb19.theshownation.com/community_market/listings/*",
+          "https://mlb19.theshownation.com/community_market/orders/*"
           ],
           "all_frames": true,
           "js": ["CommunityMarketHelper.inject.js"]
@@ -58,7 +59,15 @@
         ],
         "all_frames": true,
         "js": ["ProfitReporter.inject.js"],
-        "run_at": "document_start"
+        "run_at": "document_end"
+      },
+      {
+        "matches": [
+          "https://mlb19.theshownation.com/community_market/orders/*"
+        ],
+        "all_frames": true,
+        "js": ["CompletedOrders.inject.js"],
+        "run_at": "document_end"
       }
     ]
   }

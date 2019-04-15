@@ -1,18 +1,18 @@
 // ==UserScript==
 // @name         MLB The Show Nation Profit Reporter
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.15.1
+// @version      2019.4.15.2
 // @description  Calculates the current profitability of a card and auto-fills the text box for Buy/Sell Orders with +/- 1 Stub.  DOES NOT AUTOMATE ORDERS AND NEVER WILL!
 // @author       sreyemnayr
 
 // @match        https://mlb19.theshownation.com/community_market/listings/*
 // @grant        unsafeWindow
 // @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=689601
-// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=689602
+// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=689639
 
 // ==/UserScript==
 
-var currentVersion = "2019.4.9.3";
+var currentVersion = "2019.4.15.2";
 
 var changelog = [];
 
@@ -217,7 +217,7 @@ function moveBuyForm() {
 function moveSellForm(sellable=0) {
     var sellsDiv = document.createElement('div');
     sellsDiv.style.display = "flex";
-    sellsDiv.innerHTML = "<h3 style='color:white; margin-right: 12px;'>SELL</h3>";
+    sellsDiv.innerHTML = `<h3 style='color:white; margin-right: 12px;'>SELL (${card.sellable})</h3>`;
     
     if(sellable > 0) { sellsDiv.append(card.sellForm); }
 	page.getElementsByClassName("title-layout-main")[0].prepend(sellsDiv);

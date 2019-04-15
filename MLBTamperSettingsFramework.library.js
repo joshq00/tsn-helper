@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MLBTSNTamperSettingsFramework 2019
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.15.1
+// @version      2019.4.15.3
 // @description  Reusable pieces for MLBTSN scripts
 // @author       sreyemnayr
 // @match        https://mlb19.theshownation.com/*
@@ -725,23 +725,33 @@ var toggle = function (elem) {
 
 function tsnGo() {
     'use strict';
-    if(typeof $ !== "undefined"){
+    if(typeof $ !== "undefined" &&  $('.header-logo a').length > 0){
     
     var doc = document;
     // Add hidden settings div
-    var logo = $('.header-logo a')[0];
-    
+    var logo = $('.header-logo')[0];
+    logo.style.display = 'flex';
+    var outerStubsDiv = doc.createElement('div');
+    outerStubsDiv.style.color = 'white';
+    outerStubsDiv.style.display = 'inline-block';
+    outerStubsDiv.style.marginLeft = '5px';
     var stubsDiv = doc.createElement('div');
     stubsDiv.id = 'helperStubsDiv';
-    stubsDiv.style.color = 'white';
-    stubsDiv.style.display = 'inline-block';
-    stubsDiv.style.marginLeft = '5px';
+    stubsDiv.style.display = 'flex';
+    stubsDiv.style.flexDirection = 'column';
+    var stubsSubDiv = doc.createElement('div');
+    stubsSubDiv.id = 'helperStubsSubDiv';
+    stubsSubDiv.style.display = 'flex';
+    stubsSubDiv.style.flexDirection = 'column';
+    outerStubsDiv.append(stubsDiv);
+    outerStubsDiv.append(stubsSubDiv);
+    
     var stubsDiv2 = doc.createElement('div');
     stubsDiv2.id = 'helperStubsDiv2';
     stubsDiv2.style.color = 'white';
     stubsDiv2.style.display = 'inline-block';
     stubsDiv2.style.marginLeft = '5px';
-    logo.append(stubsDiv);
+    logo.append(outerStubsDiv);
     logo.append(stubsDiv2);
     var header = doc.getElementsByClassName('header-container')[0];
     var headerFragment = doc.createDocumentFragment();
@@ -1022,16 +1032,39 @@ function tsnGo() {
     }
     }
     else {
-        setTimeout(tsnGo, 100);
+        setTimeout(tsnGo, 250);
     }
 
 }
 
 tsnGo();
 
-function completedOrdersCheck() {
-    if ( typeof $ !== "undefined" ) {
+var topOrderHashPageOne = '';
+
+function completedOrdersCheck(page=1) {
+    if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' || md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
+    if ( typeof $ !== "undefined" && typeof toastr !== "undefined") {
 var url = 'https://mlb19.theshownation.com/community_market/orders/completed';
+if ( page > 1 ) {
+    url += '?page='+page;
+}
+var foundLast = false;
+
+var localDataBuys = {};
+if(localStorage.hasOwnProperty('tsn-completedHash')){
+    lastCompletedOrderHash = localStorage.getItem('tsn-completedHash');
+    }
+    else{
+        lastCompletedOrderHash =  md5('');
+        localStorage.setItem('tsn-completedHash', lastCompletedOrderHash );
+    }
+            
+                if(localStorage.hasOwnProperty('tsn-purchaseHistory')){
+                    localDataBuys = JSON.parse(localStorage.getItem('tsn-purchaseHistory'));
+                    }
+                 
+                 localStorage.setItem('tsn-purchaseHistory',JSON.stringify(localDataBuys));
+
         // console.log(url);
 
         $.ajax({url:url}).done(function(b){
@@ -1042,21 +1075,16 @@ var url = 'https://mlb19.theshownation.com/community_market/orders/completed';
             // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/actionshots/3785374b5e5df43203dc02054105cf58.jpg','https://s3.amazonaws.com/mlb-theshownation/tsn18/3/img/shared/default-actionshot.jpg');
             b = $.parseHTML(b);
 
-            if(localStorage.hasOwnProperty('tsn-completedHash')){
-            lastCompletedOrderHash = localStorage.getItem('tsn-completedHash');
-            }
-            else{
-                lastCompletedOrderHash =  md5('');
-                localStorage.setItem('tsn-completedHash', lastCompletedOrderHash );
-            }
+            
 
             var topOrder = $(b).find('.completed-orders-table tbody tr')[0];
             topOrderHash = md5(topOrder.innerHTML);
-            var allSales = [];
+            
+            console.log(topOrderHash, lastCompletedOrderHash);
 
             if (topOrderHash != lastCompletedOrderHash)
             {
-                localStorage.setItem('tsn-completedHash', topOrderHash )
+                if(page == 1) { topOrderHashPageOne = topOrderHash;  }
 
                 console.log("new order");
 
@@ -1065,15 +1093,12 @@ var url = 'https://mlb19.theshownation.com/community_market/orders/completed';
             $(b).find('.completed-orders-table tbody tr').each(function(i){
                 if (md5(this.innerHTML) == lastCompletedOrderHash ) {
                     foundLast = true;
+                    localStorage.setItem('tsn-completedHash', topOrderHashPageOne );
                 }
                 if (!foundLast) {
                     var item = $(this).find('a')[0];
                     var itemName = item.text;
                     var itemId = item.href.match(/[^\/]+$/g);
-
-                    if(!allSales[itemId]){
-                        allSales[itemId] = {'name': itemName, 'buys':Array(), 'sells':Array(), 'url': "https://mlb19.theshownation.com/community_market/listings/"+itemId, 'mostRecentBuy': null, 'mostRecentSell': null };
-                    }
 
                     var itemBuyOrSell = $(this).find('td')[1].innerText.match(/([^\s]+)\sfor/)[1];
                     var itemPrice = parseInt($(this).find('td')[1].innerText.replace(/,/,'').match(/\d+/)[0]);
@@ -1082,19 +1107,15 @@ var url = 'https://mlb19.theshownation.com/community_market/orders/completed';
                     var dateStringTemplate = "M/D/YYYY h:mmA Z";
                     var thisDate = moment(saleDateTd.textContent.replace(/PDT/g,"-0700"), dateStringTemplate);
 
-                    if (itemBuyOrSell == 'Sold'){
+                    
 
-                        allSales[itemId]['sells'].push(Math.round(itemPrice * .9));
-                        
-
-                        if ( allSales[itemId]['mostRecentSell'] == null ) {
-                          allSales[itemId]['mostRecentSell'] = thisDate;
+                    if (itemBuyOrSell != 'Sold'){
+                    
+                        if(!localDataBuys[itemId]){
+                            localDataBuys[itemId] = {'date': thisDate, 'amount': itemPrice };
                         }
-                    }
-                    else{
-                    allSales[itemId]['buys'].push(itemPrice);
-                        if ( allSales[itemId]['mostRecentBuy'] == null ) {
-                          allSales[itemId]['mostRecentBuy'] = thisDate;
+                        else if (moment(localDataBuys[itemId]['date']).isBefore(thisDate) ) {
+                            localDataBuys[itemId] = {'date': thisDate, 'amount': itemPrice };
                         }
                         
                     }
@@ -1104,11 +1125,20 @@ var url = 'https://mlb19.theshownation.com/community_market/orders/completed';
                 //var sellable = parseInt($($(this).parent().parent().find('.owned')[1]).text().match(/\d+/g));
                 //links.push({'team': team, 'sellable': sellable, 'url': $(this).attr('href'), 'name':$($(this).parent().parent().find('.name')[0]).text(), 'rating':$($(this).parent().parent().find('.overall')[0]).text()});
                 });
+                localStorage.setItem('tsn-purchaseHistory',JSON.stringify(localDataBuys));
+                if(!foundLast &&  lastCompletedOrderHash !=  md5('')) {
+                    completedOrdersCheck(page+1);
+                }
+                else {
+                    localStorage.setItem('tsn-completedHash', topOrderHashPageOne );
+                    openOrdersInterval = setInterval(openOrdersCheck,5000);
+                }
 
             }
             else
             {
                 console.log("No new order")
+                openOrdersInterval = setInterval(openOrdersCheck,5000);
             }
 
             
@@ -1116,12 +1146,22 @@ var url = 'https://mlb19.theshownation.com/community_market/orders/completed';
 
         });
         }
+        else {
+            setTimeout(completedOrdersCheck, 200);
+        }
+    }
 }
-var completedOrdersInterval = setInterval(completedOrdersCheck,5000);
+
+var buyAmount = 0;
+var sellAmount = 0;
+var balanceAmt = 0;
+var balancePlusBuysAmt = 0;
 
 function openOrdersCheck() {
+    clearInterval(openOrdersInterval);
     // https://mlb19.theshownation.com/community_market/orders/open
-    if ( typeof $ !== "undefined" ) {
+    if ( typeof $ !== "undefined" && $('#helperStubsDiv2').length > 0) {
+        
         var url = 'https://mlb19.theshownation.com/community_market/orders/open';
         $.ajax({url:url}).done(function(b){
             b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
@@ -1132,8 +1172,8 @@ function openOrdersCheck() {
             b = $.parseHTML(b);
             var numBuys = $(b).find('.buy-orders-table tbody tr').length;
             var numSells = $(b).find('.sell-orders-table tbody tr').length;
-            var buyAmount = 0;
-            var sellAmount = 0;
+            buyAmount = 0;
+            sellAmount = 0;
 
             if ( numBuys > 0 ) {
                 $(b).find('.buy-orders-table tbody tr td:nth-child(2)').each( function(i) {
@@ -1148,16 +1188,25 @@ function openOrdersCheck() {
                 });
                 
             }
-            $('#helperStubsDiv2')[0].innerHTML = `<small style="display:flex; flex-direction:column">${numBuys} open buys @ ${buyAmount}</small><small style="display:flex; flex-direction:column">${numSells} open sells @ ${sellAmount}</small>`;
 
+            completedOrdersCheck();
+            initialStubsCheck();
+
+            $('#helperStubsDiv2')[0].innerHTML = `<small style="display:flex; flex-direction:column">${numBuys} open buys @ ${buyAmount}</small><small style="display:flex; flex-direction:column">${numSells} open sells @ ${sellAmount}</small>`;
+            
         });
 
     }
-}
-var openOrdersInterval = setInterval(openOrdersCheck,5000);
+    else{
+        setTimeout(openOrdersCheck, 200)
+    }
 
+}
+var openOrdersInterval = setInterval(openOrdersCheck,20000);
+
+var doneInitial = false;
 function initialStubsCheck() {
-    if (typeof $ !== "undefined") {
+    if (typeof $ !== "undefined" && $('#helperStubsDiv').length > 0) {
         var url = 'https://mlb19.theshownation.com/dashboard';
         $.ajax({url:url}).done(function(b){
             b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
@@ -1166,15 +1215,20 @@ function initialStubsCheck() {
             // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/logos/logo2_wsh.png','https://s3.amazonaws.com/mlb17-shared/dist/7/img_teams/cap/logo2_wsh.png');
             // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/actionshots/3785374b5e5df43203dc02054105cf58.jpg','https://s3.amazonaws.com/mlb-theshownation/tsn18/3/img/shared/default-actionshot.jpg');
             b = $.parseHTML(b);
-            var balanceAmt = parseInt($(b).find('.currency-widget-amount')[0].textContent.replace(/[^\d]/gi,''));
-            document.getElementById('helperStubsDiv').innerHTML = '<img class="inline-icon-md" src="https://s3.amazonaws.com/the-show-websites/mlb19_portal/5/img/shared/stubs.png">'+balanceAmt.toLocaleString();
+            balanceAmt = parseInt($(b).find('.currency-widget-amount')[0].textContent.replace(/[^\d]/gi,''));
+            balancePlusBuysAmt = balanceAmt + buyAmount;
+            document.getElementById('helperStubsDiv').innerHTML = '<span><img class="inline-icon-sm" src="https://s3.amazonaws.com/the-show-websites/mlb19_portal/5/img/shared/stubs.png">'+balanceAmt.toLocaleString()+'</span>';
+            document.getElementById('helperStubsSubDiv').innerHTML = '<small style="font-style:italic; color:#a55a5a">'+balancePlusBuysAmt.toLocaleString()+"</small>";
 
         });
-        openOrdersCheck();
+        if(!doneInitial){
+            doneInitial = true;
+            openOrdersCheck();
+        }
 
     }
     else {
-        setTimeout(initialStubsCheck, 100)
+        setTimeout(initialStubsCheck, 200)
     }
 
 }
