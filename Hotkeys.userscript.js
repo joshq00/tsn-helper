@@ -47,9 +47,17 @@ function doc_keyUp(e) {
     'use strict';
     document.addEventListener('keyup', doc_keyUp, false);
     //https://mlb19.theshownation.com/mlb_fetch_community_psn_token_failed#
-
-    if ($('a[href="/sessions/login"]').length > 0) {
-        $('a[href="/sessions/login"]')[0].click()
+    function checkLogin() {
+        if ( typeof $ !== "undefined" ) {
+            if ($('a[href="/sessions/login"]').length > 0) {
+                $('a[href="/sessions/login"]')[0].click()
+            }
+        
+        }
+        else {
+            setTimeout(checkLogin, 100);
+        }
     }
+    checkLogin();
 
 })();

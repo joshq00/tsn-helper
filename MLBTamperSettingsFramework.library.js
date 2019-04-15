@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MLBTSNTamperSettingsFramework 2019
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.9.2
+// @version      2019.4.15.1
 // @description  Reusable pieces for MLBTSN scripts
 // @author       sreyemnayr
 // @match        https://mlb19.theshownation.com/*
@@ -69,6 +69,10 @@ settings.superSecretMd5 = md5(settings.superSecret);
 localStorage.setItem('tsn-settings',JSON.stringify(settings));
 
 function showUpdates(currentVersion, changelog, scriptName) {
+    
+            
+            
+        
     var updateMessageSeen = 0;
         if(localStorage.hasOwnProperty('tsn-versionUpdate-'+scriptName)){
             updateMessageSeen = localStorage.getItem('tsn-versionUpdate-'+scriptName);
@@ -117,7 +121,9 @@ function showUpdates(currentVersion, changelog, scriptName) {
                 }
             });
         }
-    }
+    
+    
+}
 
 
 
@@ -717,16 +723,26 @@ var toggle = function (elem) {
 };
 
 
-(function() {
+function tsnGo() {
     'use strict';
+    if(typeof $ !== "undefined"){
+    
     var doc = document;
     // Add hidden settings div
     var logo = $('.header-logo a')[0];
+    
     var stubsDiv = doc.createElement('div');
     stubsDiv.id = 'helperStubsDiv';
     stubsDiv.style.color = 'white';
     stubsDiv.style.display = 'inline-block';
+    stubsDiv.style.marginLeft = '5px';
+    var stubsDiv2 = doc.createElement('div');
+    stubsDiv2.id = 'helperStubsDiv2';
+    stubsDiv2.style.color = 'white';
+    stubsDiv2.style.display = 'inline-block';
+    stubsDiv2.style.marginLeft = '5px';
     logo.append(stubsDiv);
+    logo.append(stubsDiv2);
     var header = doc.getElementsByClassName('header-container')[0];
     var headerFragment = doc.createDocumentFragment();
     var settingsDiv = doc.createElement('div');
@@ -879,81 +895,118 @@ var toggle = function (elem) {
     // Add settings icon to navigation
 	var menus = doc.getElementsByClassName('menu-site');
     $(menus).each(function(menu){
-    var buttonFragment = doc.createDocumentFragment();
-    var li = doc.createElement('li');
-    var a = doc.createElement('a');
-    a.href="#";
-    var settingsButton = doc.createElement('span');
-    settingsButton.classList.add('settings-icon');
-    settingsButton.classList.add('icon');
-    // settingsButton.classList.add('button-small');
-      settingsButton.id = 'tm-settings-button'+menu;
-      
-      a.appendChild(settingsButton);
-      li.appendChild(a);
-      li.addEventListener('click', function(){
-       toggle(doc.getElementById('tm-settings'));
-          toggle(doc.getElementById('tsn-settings-save-button'+menu));
-          menu == 1 ? $('.site-offcanvas-controls-close')[0].click(): true;
-      doc.getElementById('tm-settings').focus();
-      });
-
-
-
-
-
-      buttonFragment.appendChild(li);
-    var li2 = doc.createElement('li');
-     var saveButton2 = doc.createElement('span');
-       saveButton2.classList.add('check-icon');
-        saveButton2.classList.add('icon');
-       saveButton2.id = 'tsn-settings-save-button'+menu;
-    saveButton2.classList.add('toggle-content');
-        a = doc.createElement("a");
+        var buttonFragment = doc.createDocumentFragment();
+        var li = doc.createElement('li');
+        var a = doc.createElement('a');
         a.href="#";
-        a.appendChild(saveButton2);
-      li2.appendChild(a);
-      saveButton2.addEventListener('click', function(e){
-          settings = bf.getData();
-          // console.log(settings);
-          localStorage.setItem('tsn-settings', JSON.stringify(settings));
-          toastr["success"]("TSN Helper Settings Updated","Saved");
+        var settingsButton = doc.createElement('span');
+        settingsButton.classList.add('settings-icon');
+        settingsButton.classList.add('icon');
+        // settingsButton.classList.add('button-small');
+          settingsButton.id = 'tm-settings-button'+menu;
+          
+          a.appendChild(settingsButton);
+          li.appendChild(a);
+          li.addEventListener('click', function(){
+           toggle(doc.getElementById('tm-settings'));
+              toggle(doc.getElementById('tsn-settings-save-button'+menu));
+              menu == 1 ? $('.site-offcanvas-controls-close')[0].click(): true;
+          doc.getElementById('tm-settings').focus();
+          });
 
-      //console.log();
-      });
-    buttonFragment.appendChild(li2);
-       // console.log(menu);
-    menus[menu].appendChild(buttonFragment);
-});
+
+
+
+
+          buttonFragment.appendChild(li);
+        var li2 = doc.createElement('li');
+         var saveButton2 = doc.createElement('span');
+           saveButton2.classList.add('check-icon');
+            saveButton2.classList.add('icon');
+           saveButton2.id = 'tsn-settings-save-button'+menu;
+        saveButton2.classList.add('toggle-content');
+            a = doc.createElement("a");
+            a.href="#";
+            a.appendChild(saveButton2);
+          li2.appendChild(a);
+          saveButton2.addEventListener('click', function(e){
+              settings = bf.getData();
+              // console.log(settings);
+              localStorage.setItem('tsn-settings', JSON.stringify(settings));
+              toastr["success"]("TSN Helper Settings Updated","Saved");
+
+          //console.log();
+          });
+        buttonFragment.appendChild(li2);
+           // console.log(menu);
+        menus[menu].appendChild(buttonFragment);
+    });
 
     
 
     // add patreon div to footer
     if (!inIframe()){
 
-        // hijack toastr.warning to be able to intercept it for recaptcha crap
-        let toastrJack = Object.assign({}, toastr);
-        toastr.warning = function(e = undefined, t = undefined, n = undefined) {
+        function waitForToastr(){
+            if(typeof toastr !== "undefined"){
+               
+            // hijack toastr.warning to be able to intercept it for recaptcha crap
+            let toastrJack = Object.assign({}, toastr);
+
+            Object.defineProperty(toastr, "options", {
+              get : function () {
+                return {"closeButton": true,
+                      "timeOut": 10000,
+                      "extendedTimeOut": 5000,
+                      "hideDuration":20,
+                      "preventDuplicates": true,
+                      "positionClass": "toast-top-right",
+                     };
+              }
+            });
+
+            toastr.success = function(e = undefined, t = undefined, n = undefined) {
+                console.log(e, t, n);
+                toastrJack.success(e, t, n);
+            }
+            toastr.info = function(e = undefined, t = undefined, n = undefined ) {
+                var splitE = e.split('||');
+                e = splitE[0];
+                console.log(splitE);
+                if ( typeof marketHelper !== "undefined") {
+                    marketHelper(false, "/community_market/listings/"+splitE[1])
+                }
+                toastrJack.info(e,t,n);
+            }
+            toastr.warning = function(e = undefined, t = undefined, n = undefined) {
+                
+                if(e != "Safe")
+                {
+                        document.getElementById('helperFrame').style.height = '100%';
+                        document.getElementById('helperFrame').style.transform = 'scale(1.5,1.5)';
+
+                    toastrJack.warning(e,t,n);
+                }
+                else
+                {
+                    document.getElementById('helperFrame').style.transform = '';
+                    if (!settings.showBuyFrame ) {
+                        document.getElementById('helperFrame').style.height = '1px';
+                    }
+                    else {
+                        document.getElementById('helperFrame').style.height = '300px';
+
+                    }
+                }
+            };
             
-            if(e != "Safe")
-            {
-                    document.getElementById('helperFrame').style.height = '100%';
-                    document.getElementById('helperFrame').style.transform = 'scale(1.5,1.5)';
-
-                toastrJack.warning(e,t,n);
-            }
-            else
-            {
-                document.getElementById('helperFrame').style.transform = '';
-                if (!settings.showBuyFrame ) {
-                    document.getElementById('helperFrame').style.height = '1px';
-                }
-                else {
-                    document.getElementById('helperFrame').style.height = '300px';
-
-                }
-            }
-        };
+        }
+        else{
+            console.log("Still not set");
+            setTimeout(waitForToastr, 250);
+        }
+    }
+    waitForToastr();
 
         //Object.assign(toastrJack, window.toastr);
 
@@ -967,5 +1020,162 @@ var toggle = function (elem) {
 
 
     }
+    }
+    else {
+        setTimeout(tsnGo, 100);
+    }
 
-})();
+}
+
+tsnGo();
+
+function completedOrdersCheck() {
+    if ( typeof $ !== "undefined" ) {
+var url = 'https://mlb19.theshownation.com/community_market/orders/completed';
+        // console.log(url);
+
+        $.ajax({url:url}).done(function(b){
+            b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
+           // console.log(b);
+            b = b.replace(/<script>[^<]+<\/script>/gi, "");
+            // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/logos/logo2_wsh.png','https://s3.amazonaws.com/mlb17-shared/dist/7/img_teams/cap/logo2_wsh.png');
+            // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/actionshots/3785374b5e5df43203dc02054105cf58.jpg','https://s3.amazonaws.com/mlb-theshownation/tsn18/3/img/shared/default-actionshot.jpg');
+            b = $.parseHTML(b);
+
+            if(localStorage.hasOwnProperty('tsn-completedHash')){
+            lastCompletedOrderHash = localStorage.getItem('tsn-completedHash');
+            }
+            else{
+                lastCompletedOrderHash =  md5('');
+                localStorage.setItem('tsn-completedHash', lastCompletedOrderHash );
+            }
+
+            var topOrder = $(b).find('.completed-orders-table tbody tr')[0];
+            topOrderHash = md5(topOrder.innerHTML);
+            var allSales = [];
+
+            if (topOrderHash != lastCompletedOrderHash)
+            {
+                localStorage.setItem('tsn-completedHash', topOrderHash )
+
+                console.log("new order");
+
+                var foundLast = false;
+
+            $(b).find('.completed-orders-table tbody tr').each(function(i){
+                if (md5(this.innerHTML) == lastCompletedOrderHash ) {
+                    foundLast = true;
+                }
+                if (!foundLast) {
+                    var item = $(this).find('a')[0];
+                    var itemName = item.text;
+                    var itemId = item.href.match(/[^\/]+$/g);
+
+                    if(!allSales[itemId]){
+                        allSales[itemId] = {'name': itemName, 'buys':Array(), 'sells':Array(), 'url': "https://mlb19.theshownation.com/community_market/listings/"+itemId, 'mostRecentBuy': null, 'mostRecentSell': null };
+                    }
+
+                    var itemBuyOrSell = $(this).find('td')[1].innerText.match(/([^\s]+)\sfor/)[1];
+                    var itemPrice = parseInt($(this).find('td')[1].innerText.replace(/,/,'').match(/\d+/)[0]);
+
+                    var saleDateTd = $(this).find('td')[2];
+                    var dateStringTemplate = "M/D/YYYY h:mmA Z";
+                    var thisDate = moment(saleDateTd.textContent.replace(/PDT/g,"-0700"), dateStringTemplate);
+
+                    if (itemBuyOrSell == 'Sold'){
+
+                        allSales[itemId]['sells'].push(Math.round(itemPrice * .9));
+                        
+
+                        if ( allSales[itemId]['mostRecentSell'] == null ) {
+                          allSales[itemId]['mostRecentSell'] = thisDate;
+                        }
+                    }
+                    else{
+                    allSales[itemId]['buys'].push(itemPrice);
+                        if ( allSales[itemId]['mostRecentBuy'] == null ) {
+                          allSales[itemId]['mostRecentBuy'] = thisDate;
+                        }
+                        
+                    }
+                    toastr.info(`${itemName} ${itemBuyOrSell} for ${itemPrice}||${itemId}`);
+                }
+
+                //var sellable = parseInt($($(this).parent().parent().find('.owned')[1]).text().match(/\d+/g));
+                //links.push({'team': team, 'sellable': sellable, 'url': $(this).attr('href'), 'name':$($(this).parent().parent().find('.name')[0]).text(), 'rating':$($(this).parent().parent().find('.overall')[0]).text()});
+                });
+
+            }
+            else
+            {
+                console.log("No new order")
+            }
+
+            
+            
+
+        });
+        }
+}
+var completedOrdersInterval = setInterval(completedOrdersCheck,5000);
+
+function openOrdersCheck() {
+    // https://mlb19.theshownation.com/community_market/orders/open
+    if ( typeof $ !== "undefined" ) {
+        var url = 'https://mlb19.theshownation.com/community_market/orders/open';
+        $.ajax({url:url}).done(function(b){
+            b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
+           // console.log(b);
+            b = b.replace(/<script>[^<]+<\/script>/gi, "");
+            // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/logos/logo2_wsh.png','https://s3.amazonaws.com/mlb17-shared/dist/7/img_teams/cap/logo2_wsh.png');
+            // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/actionshots/3785374b5e5df43203dc02054105cf58.jpg','https://s3.amazonaws.com/mlb-theshownation/tsn18/3/img/shared/default-actionshot.jpg');
+            b = $.parseHTML(b);
+            var numBuys = $(b).find('.buy-orders-table tbody tr').length;
+            var numSells = $(b).find('.sell-orders-table tbody tr').length;
+            var buyAmount = 0;
+            var sellAmount = 0;
+
+            if ( numBuys > 0 ) {
+                $(b).find('.buy-orders-table tbody tr td:nth-child(2)').each( function(i) {
+                    
+                    buyAmount = buyAmount + parseInt($(this)[0].textContent.replace(/[^\d]/gi, ''));
+                });
+                
+            }
+            if ( numSells > 0 ) {
+                $(b).find('.sell-orders-table tbody tr td:nth-child(2)').each( function(i) {
+                    sellAmount = sellAmount + parseInt($(this)[0].textContent.replace(/[^\d]/gi, ''));
+                });
+                
+            }
+            $('#helperStubsDiv2')[0].innerHTML = `<small style="display:flex; flex-direction:column">${numBuys} open buys @ ${buyAmount}</small><small style="display:flex; flex-direction:column">${numSells} open sells @ ${sellAmount}</small>`;
+
+        });
+
+    }
+}
+var openOrdersInterval = setInterval(openOrdersCheck,5000);
+
+function initialStubsCheck() {
+    if (typeof $ !== "undefined") {
+        var url = 'https://mlb19.theshownation.com/dashboard';
+        $.ajax({url:url}).done(function(b){
+            b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
+           // console.log(b);
+            b = b.replace(/<script>[^<]+<\/script>/gi, "");
+            // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/logos/logo2_wsh.png','https://s3.amazonaws.com/mlb17-shared/dist/7/img_teams/cap/logo2_wsh.png');
+            // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/actionshots/3785374b5e5df43203dc02054105cf58.jpg','https://s3.amazonaws.com/mlb-theshownation/tsn18/3/img/shared/default-actionshot.jpg');
+            b = $.parseHTML(b);
+            var balanceAmt = parseInt($(b).find('.currency-widget-amount')[0].textContent.replace(/[^\d]/gi,''));
+            document.getElementById('helperStubsDiv').innerHTML = '<img class="inline-icon-md" src="https://s3.amazonaws.com/the-show-websites/mlb19_portal/5/img/shared/stubs.png">'+balanceAmt.toLocaleString();
+
+        });
+        openOrdersCheck();
+
+    }
+    else {
+        setTimeout(initialStubsCheck, 100)
+    }
+
+}
+initialStubsCheck();

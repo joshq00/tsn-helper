@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MLBTSNCardData
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.9.1
+// @version      2019.4.15.1
 // @description  Collects card data from xmlhttp response
 // @author       sreyemnayr
 // @grant        none
@@ -159,41 +159,42 @@ var quickSellValues = {
 		"gold":1000,
 		"diamond":5000
 	},
-
     "equipment":{
 		"silver":25,
 		"gold":100,
-		"diamond":500
+		"diamond":1000
         },
-
-    "unlockable":{
-        "silver":100,
-        "gold":500,
-        "diamond":1000
-        },
-
     "sponsorship":{
         "silver":25,
         "gold":100,
         "diamond":500
     },
+    "unlockable":{
+        "silver":100,
+        "gold":250,
+        "diamond":1000
+        },
     "stadium":{
+    	"bronze": 10,
         "silver":25,
-        "gold":100,
-        "diamond":500
-    }
+        "gold":1000,
+        "diamond":1000
+        },
 
 
 };
 
 var doOnce = false;
-function cardData(b){
-    b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
-   // console.log(b);
-    b = b.replace(/<script>[^<]+<\/script>/gi, "");
-    // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/logos/logo2_wsh.png','https://s3.amazonaws.com/mlb17-shared/dist/7/img_teams/cap/logo2_wsh.png');
-    // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/actionshots/3785374b5e5df43203dc02054105cf58.jpg','https://s3.amazonaws.com/mlb-theshownation/tsn18/3/img/shared/default-actionshot.jpg');
-    b = $.parseHTML(b);
+function cardData(b, doc=false){
+    
+    if(!doc) {
+    	b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
+	   // console.log(b);
+	    b = b.replace(/<script>[^<]+<\/script>/gi, "");
+	    // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/logos/logo2_wsh.png','https://s3.amazonaws.com/mlb17-shared/dist/7/img_teams/cap/logo2_wsh.png');
+	    // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/actionshots/3785374b5e5df43203dc02054105cf58.jpg','https://s3.amazonaws.com/mlb-theshownation/tsn18/3/img/shared/default-actionshot.jpg');
+	    b = $.parseHTML(b);
+	}
     var errors = [];
     if($('a[href="/sessions/login"]').length > 0)
     {
@@ -298,6 +299,8 @@ function cardData(b){
         }
 
         var balance = $(b).find('.currency-widget-inner')[0];
+        var balanceAmt = parseInt(balance.textContent.replace(/[^\d]/gi, ''));
+        var balanceStr = '<img class="inline-icon-md" src="https://s3.amazonaws.com/the-show-websites/mlb19_portal/5/img/shared/stubs.png">'+balanceAmt.toLocaleString();
 
     var sellOrdersHeader = $(b).find("th:contains('Order Date') ~ th:contains('Sell Order Price')")[0];
     var sellOrdersTable = null;
@@ -509,6 +512,8 @@ function cardData(b){
         'winningBuy': winningBuy,
         'winningSell': winningSell,
         'balance': balance,
+        'balanceAmt': balanceAmt,
+        'balanceStr': balanceStr,
         'history': { 'sales': sales, 'dates': dates, 'buyOrSales': buyOrSales },
         'roi': roi,
         'avgRoi': roiAvg,

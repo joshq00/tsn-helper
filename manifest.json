@@ -28,7 +28,9 @@
         "MLBTamperSettingsFramework.library.js",
         "MLBTSNCardData.library.js",
         "Hotkeys.userscript.js",
-         "CommunityMarketHelper.userscript.js"
+         "CommunityMarketHelper.userscript.js",
+         "ProfitReporter.userscript.js",
+         "CompletedOrders.userscript.js"
         ],
     "content_scripts": [
       {
@@ -36,15 +38,27 @@
           "https://mlb19.theshownation.com/*"
         ],
         "all_frames": true,
-        "js": ["inject.js"]
+        "js": ["inject.js"],
+        "run_at": "document_start"
       },
       {
         "matches": [
             "https://mlb19.theshownation.com/community_market*"
           ],
+        "exclude_globs": [
+          "https://mlb19.theshownation.com/community_market/listings/*"
+          ],
           "all_frames": true,
           "js": ["CommunityMarketHelper.inject.js"]
 
+      },
+      {
+        "matches": [
+          "https://mlb19.theshownation.com/community_market/listings/*"
+        ],
+        "all_frames": true,
+        "js": ["ProfitReporter.inject.js"],
+        "run_at": "document_start"
       }
     ]
   }

@@ -1,21 +1,27 @@
 // ==UserScript==
 // @name         MLB The Show Nation Community Market Helper 19
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.9.2
+// @version      2019.4.15.2
 // @description  Expand community market search pages to include all pages. More features coming soon.
 // @author       sreyemnayr
 // @match        https://mlb19.theshownation.com/community_market*
 // @exclude      https://mlb19.theshownation.com/community_market/listings/*
 // @exclude      https://mlb19.theshownation.com/community_market/orders/*
-// @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=687788
-// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=687787
+// @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=689601
+// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=689602
 
 // ==/UserScript==
 //var notified = false;
 
-var currentVersion = "2019.4.9.2";
+var currentVersion = "2019.4.15.2";
 
 var changelog = [];
+
+changelog["2019.4.15.2"] = ['BIG updates!',
+                            'Order information in the navbar',
+                            'Notifications of completed orders - Patrons only ',
+                            'This may be the last that requires Tampermonkey - moving to Chrome extension for other cool features',
+                            ];
 
 changelog["2019.4.9.2"] = ['A lot of styling stuff - fixed headers on tables',
                             'Moved buy/sell cancels into the buy/sell column',
@@ -428,7 +434,7 @@ function marketHelper(onlyFavorites=false, specificTarget=''){
                 card.sellForm.target = "helperFrame";
                 //$($(this).parent().parent().children()[1]).append("<div class=\"helperDiv\" style=\"background-color:yellow; color:red\"><span class=\"stubs\"> </span> "+thisSellNowPrice+"</div>");
             firstTime[url] = 1;
-                document.getElementById('helperStubsDiv').innerHTML = card.balance.textContent;
+                document.getElementById('helperStubsDiv').innerHTML = card.balanceStr;
 
 
         if (howManyDone == howMany) {
@@ -446,7 +452,7 @@ function marketHelper(onlyFavorites=false, specificTarget=''){
 
 function orderHelper(){
     //$('.helperDiv').remove();
-    toastr.clear();
+    //toastr.clear();
     var table_headers = $('.items-results-table thead')[0];
     $(table_headers).find('th:nth-child(1)')[0].classList.add("short");
     $(table_headers).find('th:nth-child(2)')[0].classList.add("short");
@@ -584,12 +590,7 @@ var refreshInterval = interval ? interval : settings.refreshMarketInterval * 100
 (function() {
     'use strict';
 
-    toastr.options = {"closeButton": true,
-                      "timeOut": 5000,
-                      "extendedTimeOut": 5000,
-                      "hideDuration":20,
-                      "preventDuplicates": true,
-                     };
+
     //$('.marketplace-main-heading').children()[0].append(" ("+$('.order').length+")");
     //$('.marketplace-main-heading').append('<div style="float:right">Refresh interval: <input id="refresh-interval" size="5" value=".5"></input></div>');
 

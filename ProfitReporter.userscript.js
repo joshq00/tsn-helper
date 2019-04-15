@@ -1,14 +1,14 @@
 // ==UserScript==
 // @name         MLB The Show Nation Profit Reporter
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.9.3
+// @version      2019.4.15.1
 // @description  Calculates the current profitability of a card and auto-fills the text box for Buy/Sell Orders with +/- 1 Stub.  DOES NOT AUTOMATE ORDERS AND NEVER WILL!
 // @author       sreyemnayr
-// @run-at       document-end
+
 // @match        https://mlb19.theshownation.com/community_market/listings/*
 // @grant        unsafeWindow
-// @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=687788
-// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=687787
+// @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=689601
+// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=689602
 
 // ==/UserScript==
 
@@ -25,7 +25,15 @@ changelog["2019.4.8.1"] = ['Working on re-tooling toward using CM Helper logic -
                             ]
 
 
+function waitForShowUpdates(){
+if ( typeof showUpdates !== "undefined" ) {
 showUpdates(currentVersion, changelog, 'ProfitReporter');
+}
+else {
+    setTimeout(waitForShowUpdates, 100);
+}
+}
+waitForShowUpdates();
 
 function xpathToArray(xpath, context=document) {
     var result = document.evaluate(xpath, context);
@@ -36,12 +44,8 @@ function xpathToArray(xpath, context=document) {
     return nodes;
 }
 
-
-(function() {
-    'use strict';
-   var cancelTarget;
-    var page = document;
-
+function reDirectToastr() {
+    if ( typeof toastr !== "undefined" ) {
     if ( inIframe() ) {
         toastr = window.top.toastr;
         // $('img').attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
@@ -56,7 +60,44 @@ function xpathToArray(xpath, context=document) {
             toastr.warning('Safe');
         }
 
+
+
     }
+    }
+    else
+    {
+        setTimeout(reDirectToastr, 100);
+    }
+}
+reDirectToastr();
+
+
+
+
+
+(function() {
+    'use strict';
+   var cancelTarget;
+
+function waitForElement(){
+    if(typeof cardData !== "undefined" && typeof settings !== "undefined" && typeof $ !== "undefined"){
+        var card = cardData(document, true);
+        document.getElementById('helperStubsDiv').innerHTML = card.balanceStr;
+
+
+
+
+    var page = document;
+
+
+   
+
+
+    
+     
+
+        
+    
 
 /*
     var card = {
@@ -154,8 +195,7 @@ function checkBuyOrders() {
     }
 }
 */
-    var card = cardData(document.documentElement.innerHTML);
-
+    
 function moveBuyForm() {
     var buysDiv = document.createElement('div');
     buysDiv.style.display = "flex";
@@ -245,27 +285,37 @@ document.addEventListener('keyup', doc_keyUp, false);
 
 
 
-  var chart = new Chart(document.getElementById("completed-orders"), {
-    "type": "line",
-    "data": {
-      "datasets": [
-        { "data": card.history.sales, "fill": false, "backgroundColor": "#4B79A1", "borderColor": "#4B79A1", "showLine": false }
-      ],
-      "labels": card.history.buyOrSales,
-    },
-    "options": {
-      "responsive": true,
-      "maintainAspectRatio": false,
-      "legend": {
-        "display": false
-      },
-      "title": {
-        "display": true,
-        "text": "Completed Orders"
-      }
+
+function updateChart() {
+    if( document.getElementById("completed-orders") != null ) {
+      var chart = new Chart(document.getElementById("completed-orders"), {
+        "type": "line",
+        "data": {
+          "datasets": [
+            { "data": card.history.sales, "fill": false, "backgroundColor": "#4B79A1", "borderColor": "#4B79A1", "showLine": false }
+          ],
+          "labels": card.history.buyOrSales,
+        },
+        "options": {
+          "responsive": true,
+          "maintainAspectRatio": false,
+          "legend": {
+            "display": false
+          },
+          "title": {
+            "display": true,
+            "text": "Completed Orders"
+          }
+        }
+      });
+        chart.update();
     }
-  });
-    chart.update();
+    else {
+        setTimeout(updateChart, 100);
+    }
+
+}
+updateChart();
 
     
 
@@ -355,13 +405,13 @@ page.getElementsByClassName("title-layout-main")[0].prepend(cardDataDiv);
 
     mainHeading.prepend(document.querySelector(".currency-widget-inner"));
 
-    var buyOrdersTitle = document.evaluate("//th[contains(.,'Order Date')]/following-sibling::th[contains(.,'Buy Order Price')]").iterateNext()
+    var buyOrdersTitle = document.evaluate("//th[contains(.,'Order Date')]/following-sibling::th[contains(.,'Buy Order Price')]", document).iterateNext()
     if (buyOrdersTitle != null) { var buyEl = document.createElement("small");
                                   buyEl.innerText=" ( " + card.buyNow + " ) "
                                   buyOrdersTitle.appendChild(buyEl);
                                 }
 
-    var sellOrdersTitle = document.evaluate("//th[contains(.,'Order Date')]/following-sibling::th[contains(.,'Sell Order Price')]").iterateNext()
+    var sellOrdersTitle = document.evaluate("//th[contains(.,'Order Date')]/following-sibling::th[contains(.,'Sell Order Price')]", document).iterateNext()
     if (sellOrdersTitle != null) { var sellEl = document.createElement("small");
                                   sellEl.innerText=" ( " + card.sellNow + " ) "
                                   sellOrdersTitle.appendChild(sellEl);
@@ -407,5 +457,12 @@ page.getElementsByClassName("title-layout-main")[0].prepend(cardDataDiv);
 setTimeout(function(){ window.location.reload(); }, (1000*parseInt(settings.refreshInterval))); // 1000 * seconds [(60) * minutes ]
 }
 
+}
+    else{
+        console.log("Still not set");
+        setTimeout(waitForElement, 250);
+    }
+}
+waitForElement();
 
 })();
