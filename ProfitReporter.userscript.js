@@ -80,8 +80,8 @@ reDirectToastr();
    var cancelTarget;
 
 function waitForElement(){
-    if(typeof cardData !== "undefined" && typeof settings !== "undefined" && typeof $ !== "undefined"){
-        var card = cardData(document, true);
+    if(typeof cardData !== "undefined" && typeof settings !== "undefined" && typeof $ !== "undefined" && $('#helperStubsDiv').length > 0){
+        var card = cardData(document, true, window.location.pathname.split('/')[window.location.pathname.split('/').length -1]);
         document.getElementById('helperStubsDiv').innerHTML = card.balanceStr;
 
 
@@ -332,6 +332,8 @@ updateChart();
         
         'quickSellValue': "QuickSell",
         'profitMargin': "Profit",
+        'lastBuyDate': "Last Buy",
+        'lastBuyAmt': "Last Buy Amount",
         'exchangeValue': "Exchange",
         'soldLastHour': "Last Hour",
         'soldToday': "Today",
@@ -358,6 +360,8 @@ updateChart();
         
         'quickSellValue': "orange",
         'profitMargin': "green",
+        'lastBuyDate': "blue",
+        'lastBuyAmt': "blue",
         'exchangeValue': "orange",
         'soldLastHour': "yellow",
         'soldToday': "yellow",

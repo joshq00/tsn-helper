@@ -185,8 +185,25 @@ var quickSellValues = {
 };
 
 var doOnce = false;
-function cardData(b, doc=false){
+function cardData(b, doc=false, id=''){
+    var lastBuyAmt = 0;
+    var lastBuyDate = null;
+
+    if(id != '') {
+
     
+    var localDataBuys = {};
+                if(localStorage.hasOwnProperty('tsn-purchaseHistory')){
+                    localDataBuys = JSON.parse(localStorage.getItem('tsn-purchaseHistory'));
+                    }
+    
+    if ( localDataBuys[id] ) {
+        lastBuyAmt = localDataBuys[id]['amount'];
+        lastBuyDate = localDataBuys[id]['date'];
+
+    }
+                }
+
     if(!doc) {
     	b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
 	   // console.log(b);
@@ -300,7 +317,7 @@ function cardData(b, doc=false){
 
         var balance = $(b).find('.currency-widget-inner')[0];
         var balanceAmt = parseInt(balance.textContent.replace(/[^\d]/gi, ''));
-        var balanceStr = '<img class="inline-icon-md" src="https://s3.amazonaws.com/the-show-websites/mlb19_portal/5/img/shared/stubs.png">'+balanceAmt.toLocaleString();
+        var balanceStr = '<span><img class="inline-icon-sm" src="https://s3.amazonaws.com/the-show-websites/mlb19_portal/5/img/shared/stubs.png">'+balanceAmt.toLocaleString()+"</span>";
 
     var sellOrdersHeader = $(b).find("th:contains('Order Date') ~ th:contains('Sell Order Price')")[0];
     var sellOrdersTable = null;
@@ -515,6 +532,8 @@ function cardData(b, doc=false){
         'balanceAmt': balanceAmt,
         'balanceStr': balanceStr,
         'history': { 'sales': sales, 'dates': dates, 'buyOrSales': buyOrSales },
+        'lastBuyAmt': lastBuyAmt,
+        'lastBuyDate': moment(lastBuyDate).fromNow(),
         'roi': roi,
         'avgRoi': roiAvg,
         'errors': [],

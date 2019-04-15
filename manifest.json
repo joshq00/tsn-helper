@@ -59,7 +59,7 @@
         ],
         "all_frames": true,
         "js": ["ProfitReporter.inject.js"],
-        "run_at": "document_end"
+        "run_at": "document_start"
       },
       {
         "matches": [

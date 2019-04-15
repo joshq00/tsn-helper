@@ -1050,7 +1050,7 @@ if ( page > 1 ) {
 }
 var foundLast = false;
 
-var localDataBuys = {};
+
 if(localStorage.hasOwnProperty('tsn-completedHash')){
     lastCompletedOrderHash = localStorage.getItem('tsn-completedHash');
     }
@@ -1058,7 +1058,7 @@ if(localStorage.hasOwnProperty('tsn-completedHash')){
         lastCompletedOrderHash =  md5('');
         localStorage.setItem('tsn-completedHash', lastCompletedOrderHash );
     }
-            
+            var localDataBuys = {};
                 if(localStorage.hasOwnProperty('tsn-purchaseHistory')){
                     localDataBuys = JSON.parse(localStorage.getItem('tsn-purchaseHistory'));
                     }
