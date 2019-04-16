@@ -45,7 +45,7 @@ function xpathToArray(xpath, context=document) {
 }
 
 function reDirectToastr() {
-    if ( typeof toastr !== "undefined" ) {
+    if ( typeof toastr !== "undefined" && typeof inIframe !== "undefined") {
     if ( inIframe() ) {
         toastr = window.top.toastr;
         // $('img').attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
