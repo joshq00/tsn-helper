@@ -156,7 +156,7 @@ var runningTotal=0;
                     var lastSellData = numSells > 0 ? i.mostRecentSell.unix(): 0;
                     var tabularData = '<tr><td>'+i.name.substr(0,20)+'<a href="'+i.url+'"><span class="external-link-icon"></span></a></td><td>'+numBuys+'</td><td>'+numSells+'</td><td>'+buysTotal+'</td><td>'+sellsTotal+'</td><td>'+buysAvg+'</td><td>'+sellsAvg+'</td><td>'+avgProfit+'</td><td>'+(sellsTotal-buysTotal)+'</td><td data-sort="'+lastBuyData+'">'+lastBuy+'</td><td data-sort="'+lastSellData+'">'+lastSell+'</td></tr>';
                     //console.log(tabularData);
-                    if ( !settings.ignoreSoloBuySell || ( numBuys > 1 && numSells > 1 ) ) {
+                    if ( !settings.ignoreSoloBuySell || ( numBuys + numSells > 1 ) ) {
                     $('#inventory-table-body').append(tabularData); }
                     runningTotal = runningTotal + (sellsTotal-buysTotal);
                     runningProfitTotal = runningProfitTotal - buysTotal + sellsTotal;

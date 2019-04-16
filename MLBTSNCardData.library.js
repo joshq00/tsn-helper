@@ -183,25 +183,22 @@ var quickSellValues = {
 
 
 };
-
+var localDataBuys = {};
 var doOnce = false;
 function cardData(b, doc=false, id=''){
     var lastBuyAmt = 0;
     var lastBuyDate = null;
+    var myProfit = null;
 
     if(id != '') {
 
     
-    var localDataBuys = {};
+    
                 if(localStorage.hasOwnProperty('tsn-purchaseHistory')){
                     localDataBuys = JSON.parse(localStorage.getItem('tsn-purchaseHistory'));
                     }
     
-    if ( localDataBuys[id] ) {
-        lastBuyAmt = localDataBuys[id]['amount'];
-        lastBuyDate = localDataBuys[id]['date'];
-
-    }
+    
                 }
 
     if(!doc) {
@@ -280,6 +277,13 @@ function cardData(b, doc=false, id=''){
 
     var profitMargin = parseInt(buyNow * 0.90 - sellNow);
 
+    if ( localDataBuys.hasOwnProperty(id) ) {
+        lastBuyAmt = parseInt(localDataBuys[id]['amount']);
+        lastBuyDate = localDataBuys[id]['date'];
+        myProfit = parseInt(buyNow * 0.90 - lastBuyAmt);
+
+    }
+
     var outbidBuy = false;
     var outbidSell = false;
     var winningBuy = false;
@@ -346,7 +350,9 @@ function cardData(b, doc=false, id=''){
 
     //var sellable = parseInt($($(b).find('html body div div div div div div div div div div div:contains("Sellable")')[0]).text().match(/\d+/g));
     // console.log(b);
-    try{ var sellable = parseInt($(b).find('div.mini-widget-main:contains("Sellable")')[0].textContent.replace("Sellable | ", "")); }
+    var sellable = 0; var owned = 0; 
+    try{  sellable = parseInt($(b).find('div.mini-widget-main:contains("Sellable")')[0].textContent.replace("Sellable | ", ""));
+    owned = parseInt($(b).find('div.mini-widget-main:contains("Owned")')[0].textContent.replace("Owned | ", "")); }
     catch(error) { console.log(error); }
 
     var dates = [];
@@ -427,7 +433,7 @@ function cardData(b, doc=false, id=''){
     var numThreeHours = 0;
     var numToday = 0;
     var now = moment();
-    var today = moment().hours(0);
+    var today = moment().hours(0).minutes(0).seconds(0);
 
     var OneHourAgo = moment().subtract(1, 'hours');
     var ThreeHoursAgo = moment().subtract(3, 'hours');
@@ -453,6 +459,13 @@ function cardData(b, doc=false, id=''){
         numToday++;
 
     }
+    }
+    if (numToday == 200){
+        var timeToday = now.diff(today,'minutes');
+        var lastTime = dates[199];
+        var timeCovered = now.diff(lastTime, 'minutes');
+        numToday = Math.round( (200 * timeToday ) / timeCovered );
+
     }
 
 
@@ -483,6 +496,8 @@ function cardData(b, doc=false, id=''){
         errors.push("Recaptcha");
     }
 
+    var perExchange = Math.round ( (exchangeValue / (sellNow + 1) * 100) ) / 100 ;
+
 
     return {
         'name': name,
@@ -502,7 +517,9 @@ function cardData(b, doc=false, id=''){
         'cardType':cardType,
         'shield': shield,
         'exchangeValue': exchangeValue,
+        'perExchange': perExchange,
         'sellable': sellable,
+        'owned': owned,
         'soldLastHour': numHour,
         'soldToday': numToday,
         'salesPerMinute': salesPerMinute,
@@ -526,6 +543,7 @@ function cardData(b, doc=false, id=''){
         'cancelSellButtons': cancelSellButtons,
         'openBuys': openBuys,
         'openSells': openSells,
+        'openOrders': openBuys + openSells,
         'winningBuy': winningBuy,
         'winningSell': winningSell,
         'balance': balance,
@@ -534,6 +552,7 @@ function cardData(b, doc=false, id=''){
         'history': { 'sales': sales, 'dates': dates, 'buyOrSales': buyOrSales },
         'lastBuyAmt': lastBuyAmt,
         'lastBuyDate': moment(lastBuyDate).fromNow(),
+        'myProfit': myProfit,
         'roi': roi,
         'avgRoi': roiAvg,
         'errors': [],

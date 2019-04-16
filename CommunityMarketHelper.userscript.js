@@ -168,18 +168,43 @@ var notifiedSell = {};
 var helperFrame;
 var tables;
 var sort;
-/*
-var settings;
-if(localStorage.hasOwnProperty('tsn-settings')){
-    settings = JSON.parse(localStorage.getItem('tsn-settings'));
 
-   }
-else{
-    settings = {};
-    settings.refreshInterval = 15;
-    settings.refreshMarketInterval = 0;
-    localStorage.setItem('tsn-settings',JSON.stringify(settings));
-}*/
+/*
+$(table_headers).find('th:nth-child(6)').after("<th data-sort-method=\"number\" title=\"Profit\">±</th>"+
+                                                   "<th data-sort-method=\"number\" title=\"Sellable\">#</th>"+
+                                                    "<th data-sort-method=\"number\" title=\"Return on Investment\">ROI</th>"+
+                                                   "<th data-sort-method=\"number\" title=\"Sales per hour (last 200)\">S/H</th>"+
+                                                   "<th data-sort-method=\"number\" title=\"Potential Profit per Minute\">PP/m</th>"+
+                                                   "<th data-sort-method=\"number\" title=\"Estimated historical Buy/Sell gap\">Gap</th>"+
+                                                   "<th title=\"Average sale price\" style=\"text-transform: none;\">μ<sub>SELL</sub></th>"+
+                                                  "<th title=\"Sell Difference to Average\" style=\"text-transform: none;\">ƒ<sub>SELL</sub></th>"+
+                                                    "<th title=\"Average buy price\" style=\"text-transform: none;\">μ<sub>BUY</sub></th>"+
+                                                   "<th title=\"Buy Difference to Average\" style=\"text-transform: none;\">ƒ<sub>BUY</sub></th>"+
+                                                    "<th title=\"Average profit\" style=\"text-transform: none;\">μ<sub>±</sub></th>"+
+                                                    "<th title=\"Average ROI\" style=\"text-transform: none;\">μ<sub>ROI</sub></th>"+
+*/
+
+var dataPoints = {
+        
+    'profitMargin': {'title': "Profit Margin", 'heading': '±', 'class': 'short', 'patronsOnly': false},
+    'myProfit': {'title': "Profit Margin from last Buy", 'heading': '±<sub>Δ</sub>', 'class': 'short', 'patronsOnly': true},
+    'owned': {'title': "Number Owned", 'heading': '#<sub>O</sub>', 'class': 'short', 'patronsOnly': false},
+    'sellable': {'title': "Number Sellable", 'heading': '#<sub>S</sub>', 'class': 'short', 'patronsOnly': false},
+    'roi': {'title': "Percent Return on Investment", 'heading': 'ROI', 'class': 'short', 'patronsOnly': true},
+    'salesPerHour': {'title': "Sales per Hour (last 200)", 'heading': 'S/H', 'class': 'short', 'patronsOnly': false},
+    'ppm': {'title': "Potential Profit per Minute", 'heading': 'PPM', 'class': 'short', 'patronsOnly': true},
+    'profitGap': {'title': "Estimated historical Buy/Sell gap", 'heading': 'GAP', 'class': 'short', 'patronsOnly': false},
+    'avgBuyNow': {'title': "Average sell order price", 'heading': 'μ<sub>SELL</sub>', 'class': 'short', 'patronsOnly': true},
+    'buyTrend': {'title': "Sell factor (current difference from average)", 'heading': 'ƒ<sub>SELL</sub>', 'class': 'short', 'patronsOnly': true},
+    'avgSellNow': {'title': "Average buy order price", 'heading': 'μ<sub>BUY</sub>', 'class': 'short', 'patronsOnly': true},
+    'sellTrend': {'title': "Buy factor (current difference from average)", 'heading': 'ƒ<sub>BUY</sub>', 'class': 'short', 'patronsOnly': true},
+    'avgProfit': {'title': "Average buy order price", 'heading': 'μ<sub>±</sub>', 'class': 'short', 'patronsOnly': false},
+    'avgRoi': {'title': "Average buy order price", 'heading': 'μ<sub>ROI</sub>', 'class': 'short', 'patronsOnly': true},
+    'perExchange': {'title': "Cost per Exchange Point", 'heading': 'XCH', 'class': 'short', 'patronsOnly': true},
+    'openOrders': {'title': "Open Orders", 'heading': 'OPEN', 'class': 'short', 'patronsOnly': false},
+
+}
+
 
 function marketHelper(onlyFavorites=false, specificTarget=''){
    // console.log("Debug1");
@@ -221,7 +246,7 @@ function marketHelper(onlyFavorites=false, specificTarget=''){
         var profitMargin = "";
         $.ajax({url:url, context:this}).done(function(b){
             howManyDone++;
-            var card = cardData(b);
+            var card = cardData(b, false, url.split('/')[url.split('/').length -1]);
             if (card.errors.length > 1)
             {
                 for (var e of card.errors) {
@@ -362,6 +387,19 @@ function marketHelper(onlyFavorites=false, specificTarget=''){
                     });
                 }
 
+                var i = 0;
+                for (dataPoint in dataPoints){
+                    if ( !dataPoints[dataPoint].patronsOnly || 
+                        md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
+                        md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
+
+                            var thisTd = $(this).parent().parent().find('td:nth-child('+(i+7)+')');
+                            thisTd[0].innerHTML = card[dataPoint];
+                            i++;
+
+                        }
+                }
+                /*
                 var profitTd = $(this).parent().parent().find('td:nth-child(7)');
                 profitTd[0].innerHTML = card.profitMargin;
 
@@ -412,14 +450,15 @@ function marketHelper(onlyFavorites=false, specificTarget=''){
 
                 var avgRoiTd = $(this).parent().parent().find('td:nth-child(18)');
                 avgRoiTd[0].innerHTML = card.avgRoi;
+                }*/
 
-                var brandTd = $(this).parent().parent().find('td:nth-child(19)');
+                var brandTd = $(this).parent().parent().find('td:nth-last-child(2)');
                 $(brandTd).attr("data-sort", brandTd[0].textContent);
                 brandTd[0].innerHTML = replaceBulk(brandTd[0].innerHTML, findReplaceSeries);
                 brandTd[0].innerHTML = replaceBulk(brandTd[0].innerHTML, findReplaceBrands);
 
                 
-            }
+            
 
                 
 
@@ -472,39 +511,35 @@ function orderHelper(){
     $(table_headers).find('th:nth-child(8)')[0].innerHTML = "";
 
     $(table_headers).find('th:nth-child(1)').attr("data-sort-default", true);
-    if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
-                  md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
-    $(table_headers).find('th:nth-child(6)').after("<th data-sort-method=\"number\" title=\"Profit\">±</th>"+
-                                                   "<th data-sort-method=\"number\" title=\"Sellable\">#</th>"+
-                                                    "<th data-sort-method=\"number\" title=\"Return on Investment\">ROI</th>"+
-                                                   "<th data-sort-method=\"number\" title=\"Sales per hour (last 200)\">S/H</th>"+
-                                                   "<th data-sort-method=\"number\" title=\"Potential Profit per Minute\">PP/m</th>"+
-                                                   "<th data-sort-method=\"number\" title=\"Estimated historical Buy/Sell gap\">Gap</th>"+
-                                                   "<th title=\"Average sale price\" style=\"text-transform: none;\">μ<sub>SELL</sub></th>"+
-                                                  "<th title=\"Sell Difference to Average\" style=\"text-transform: none;\">ƒ<sub>SELL</sub></th>"+
-                                                    "<th title=\"Average buy price\" style=\"text-transform: none;\">μ<sub>BUY</sub></th>"+
-                                                   "<th title=\"Buy Difference to Average\" style=\"text-transform: none;\">ƒ<sub>BUY</sub></th>"+
-                                                    "<th title=\"Average profit\" style=\"text-transform: none;\">μ<sub>±</sub></th>"+
-                                                    "<th title=\"Average ROI\" style=\"text-transform: none;\">μ<sub>ROI</sub></th>"+
+    
+    $(table_headers).find('th:nth-child(6)').after(function() {
+        var returnString = '';
 
-                                                  "");
+        
+                for (dataPoint in dataPoints){
+                    if ( !dataPoints[dataPoint].patronsOnly || 
+                        md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
+                        md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
 
-    }
-    else
-    {
-        $(table_headers).find('th:nth-child(6)').after("<th data-sort-method=\"number\" title=\"Profit\">±</th><th data-sort-method=\"number\" title=\"Sellable\">#</th><th>ROI</th>");
+                            returnString = returnString + `<th data-sort-method="number" style="text-transform: none;" title="${dataPoints[dataPoint].title}">${dataPoints[dataPoint].heading}</th>`;
 
-    }
+                        }
+                }
+
+        return returnString;
+    });
+
+    
     $(document).tooltip();
 
     tables = $('.items-results-table tbody')[0];
     if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                   md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
-        $(tables).find('tr td:nth-child(6)').after("<td>0</td>".repeat(12));
+        $(tables).find('tr td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).length));
     }
     else
     {
-        $(tables).find('tr td:nth-child(6)').after("<td>0</td>".repeat(3));
+        $(tables).find('tr td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).filter((x) => (dataPoints[x].patronsOnly != true)).length));
     }
     //$(tables).find('tr td:nth-child(2) img').each( function(i) {
     //    $(this).src("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
@@ -548,11 +583,11 @@ function orderHelper(){
 
                 if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                   md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
-                    $(tr).find('td:nth-child(6)').after("<td>0</td>".repeat(12));
+                    $(tr).find('td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).length));
                 }
                 else
                 {
-                    $(tr).find('td:nth-child(6)').after("<td>0</td>".repeat(3));
+                    $(tr).find('td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).filter((x) => (dataPoints[x].patronsOnly != true)).length));
                 }
                 tables.append(tr);
             }
