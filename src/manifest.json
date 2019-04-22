@@ -9,7 +9,8 @@
         "notifications",
         "webRequest",
         "webRequestBlocking",
-        "<all_urls>"
+        "activeTab",
+        "*://mlb19.theshownation.com/*"
       ],
     "externally_connectable": {
       "ids": ["*"],
