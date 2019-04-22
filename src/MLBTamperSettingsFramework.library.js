@@ -51,6 +51,9 @@ var settings_defaults = {
     "refreshMarketInterval": 60, 
     "showBuyFrame": false, 
     "ignoreSoloBuySell": false, 
+    "webNotifications": false,
+    "chromeNotifications": true,
+    "hiddenColumns": []
      }
 
 // Get/init localStorage settings
@@ -182,6 +185,22 @@ schema = {
             "required": true,
             "readOnly": true
             },
+        "webNotifications": {
+            "type": "boolean",
+            "title": "In-page notifications?",
+            "description": "[Patrons Only Feature ] Receive notifications on the website for completed buys/sells?",
+            "default": false,
+            "required": true,
+            "readOnly": true
+        },
+        "chromeNotifications": {
+            "type": "boolean",
+            "title": "Chrome notifications?",
+            "description": "[Patrons Only Feature ] Receive notifications from the browser for completed buys/sells?",
+            "default": false,
+            "required": true,
+            "readOnly": true
+        },
         "superSecret": {
                         "type": "string",
                         "title": "Game Genie",
@@ -227,6 +246,36 @@ if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' || md5(settin
             "default": false,
             "required": true
             },
+        "hiddenColumns": {
+            "type": "array",
+            "title": "Hidden Columns in Community Market",
+            "minItems": 0,
+            "uniqueItems": true,
+            "items": {
+                "type": "string",
+                "title": "Hidden column",
+                "description": "Do not show this column",
+                "enum": [
+                    {"text": "Profit", "value": "profitMargin"},
+                    {"text": "Delta Profit (based on last purchase)", "value": "myProfit"},
+                    {"text": "PPM: Potential Profit per Minute", "value": "ppm"},
+                    {"text": "ROI: Return on Investment", "value": "roi"},
+                    {"text": "Average sale price", "value": "avgBuyNow"},
+                    {"text": "Average buy price", "value": "avgSellNow"},
+                    {"text": "Average profit", "value": "avgProfit"},
+                    {"text": "Average ROI", "value": "avgRoi"},
+                    {"text": "Exchange Points per Stub", "value": "perExchange"},
+                    {"text": "Buy Factor: Trend vs historical average", "value": "buyTrend"},
+                    {"text": "Sell Factor: Trend vs historical average", "value": "sellTrend"},
+                    {"text": "Popularity (sales per hour)", "value": "salesPerHour"},
+                    {"text": "Sellable #", "value": "sellable"},
+                    {"text": "Owned #", "value": "owned"},
+                    {"text": "Open Orders", "value": "openOrders"},
+                    {"text": "Profit Gap: Estimated historical buy/sell gap", "value": "profitGap"},
+                    ],
+            }
+
+        }
         });
     
 
@@ -703,6 +752,17 @@ table.items-results-table td a {
     overflow-y: hidden;
 }
 
+.title-layout-split-aside {
+    flex-basis: 5% !important;
+    min-width: 5% !important;
+}
+
+.title-layout-split-main {
+    flex-basis 95% !important;
+    max-width: 95% !important;
+
+}
+
 `);
 
 
@@ -1119,7 +1179,14 @@ if(localStorage.hasOwnProperty('tsn-completedHash')){
                         }
                         
                     }
+                    if(settings.chromeNotifications) {
+                    chrome.runtime.sendMessage(extensionId, {"itemName": itemName, "itemBuyOrSell": itemBuyOrSell, "itemPrice": itemPrice, "itemId": itemId}, function(response) {
+                         console.log(response.msg);
+                      });
+                    }
+                    if(settings.webNotifications) {
                     toastr.info(`${itemName} ${itemBuyOrSell} for ${itemPrice}||${itemId}`);
+                    }
                 }
 
                 //var sellable = parseInt($($(this).parent().parent().find('.owned')[1]).text().match(/\d+/g));
@@ -1233,3 +1300,17 @@ function initialStubsCheck() {
 
 }
 initialStubsCheck();
+
+/*function testSendMessage(){
+    if(typeof extensionId !== 'undefined'){
+        console.log("Extension ID", extensionId);
+        chrome.runtime.sendMessage(extensionId, {"itemName": "Test Item", "itemBuyOrSell": "itemBuyOrSell", "itemPrice": "itemPrice", "itemId": "itemId"}, function(response) {
+        console.log(response);
+        });
+    }
+    else {
+        setTimeout(testSendMessage, 200);
+    }
+}
+testSendMessage();
+*/

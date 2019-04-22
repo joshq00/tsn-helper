@@ -48,7 +48,7 @@ function doc_keyUp(e) {
     document.addEventListener('keyup', doc_keyUp, false);
     //https://mlb19.theshownation.com/mlb_fetch_community_psn_token_failed#
     function checkLogin() {
-        if ( typeof $ !== "undefined" ) {
+        if ( typeof $ !== "undefined" && $('a').length > 0 ) {
             if ($('a[href="/sessions/login"]').length > 0) {
                 $('a[href="/sessions/login"]')[0].click()
             }

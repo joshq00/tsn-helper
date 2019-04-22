@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         MLB The Show Nation Community Market Helper 19
 // @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.15.3
+// @version      2019.4.22.1
 // @description  Expand community market search pages to include all pages. More features coming soon.
 // @author       sreyemnayr
 // @match        https://mlb19.theshownation.com/community_market*
@@ -16,6 +16,12 @@
 var currentVersion = "2019.4.15.3";
 
 var changelog = [];
+
+changelog["2019.4.22.1"] = ['Moved notifications to the Chrome browser. (Patrons Only)',
+                            'Notifications happen in the background, even if you are not on MLBTSN',
+                            'Settings to ignore columns for Community Market Helper (Patrons Only)',
+                            'Refresh button to manually refresh columns',
+                            'Temporary issue: the auto-reload item on buy/sell notification is not functioning now that the notification is in the browser. I am working on this.']
 
 changelog["2019.4.15.3"] = ['Some fixes for the notifications - last update before Chrome Extension',]
 
@@ -200,7 +206,7 @@ var dataPoints = {
     'sellTrend': {'title': "Buy factor (current difference from average)", 'heading': 'ƒ<sub>BUY</sub>', 'class': 'short', 'patronsOnly': true},
     'avgProfit': {'title': "Average buy order price", 'heading': 'μ<sub>±</sub>', 'class': 'short', 'patronsOnly': false},
     'avgRoi': {'title': "Average buy order price", 'heading': 'μ<sub>ROI</sub>', 'class': 'short', 'patronsOnly': true},
-    'perExchange': {'title': "Cost per Exchange Point", 'heading': 'XCH', 'class': 'short', 'patronsOnly': true},
+    'perExchange': {'title': "Exchange Point per Stub", 'heading': 'XCH', 'class': 'short', 'patronsOnly': true},
     'openOrders': {'title': "Open Orders", 'heading': 'OPEN', 'class': 'short', 'patronsOnly': false},
 
 }
@@ -328,7 +334,15 @@ function marketHelper(onlyFavorites=false, specificTarget=''){
                 var imgTd = $(this).parent().parent().find('td:nth-child(2)');
                 imgTd[0].classList.add("short");
 
+                var refreshDiv = document.createElement('div');
+                refreshDiv.classList.add('reload-icon');
+                refreshDiv.classList.add('icon');
+
                 imgTd[0].innerHTML = '';
+                imgTd[0].append(refreshDiv);
+                refreshDiv.addEventListener("click", function(e) {
+                    marketHelper(false, url);
+                });
 
                 var nameTd = $(this).parent().parent().find('td:nth-child(3)');
                 nameTd[0].classList.add("long");
@@ -392,10 +406,11 @@ function marketHelper(onlyFavorites=false, specificTarget=''){
                     if ( !dataPoints[dataPoint].patronsOnly || 
                         md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                         md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
-
+                            if ( ! settings.hiddenColumns.includes(dataPoint) ) {
                             var thisTd = $(this).parent().parent().find('td:nth-child('+(i+7)+')');
                             thisTd[0].innerHTML = card[dataPoint];
                             i++;
+                            }
 
                         }
                 }
@@ -520,9 +535,9 @@ function orderHelper(){
                     if ( !dataPoints[dataPoint].patronsOnly || 
                         md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                         md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
-
+                            if ( ! settings.hiddenColumns.includes(dataPoint) ) {
                             returnString = returnString + `<th data-sort-method="number" style="text-transform: none;" title="${dataPoints[dataPoint].title}">${dataPoints[dataPoint].heading}</th>`;
-
+                            }
                         }
                 }
 
@@ -535,11 +550,11 @@ function orderHelper(){
     tables = $('.items-results-table tbody')[0];
     if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                   md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
-        $(tables).find('tr td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).length));
+        $(tables).find('tr td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).filter((x) => (!settings.hiddenColumns.includes(x))).length));
     }
     else
     {
-        $(tables).find('tr td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).filter((x) => (dataPoints[x].patronsOnly != true)).length));
+        $(tables).find('tr td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).filter((x) => (dataPoints[x].patronsOnly != true && !settings.hiddenColumns.includes(x))).length));
     }
     //$(tables).find('tr td:nth-child(2) img').each( function(i) {
     //    $(this).src("data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==");
@@ -556,8 +571,8 @@ function orderHelper(){
         try {numPages = parseInt($('.pagination').find('a')[$('.pagination').find('a').length-2].innerText);}
         catch(error) { console.log(error);}
        // console.log(numPages);
-    if(numPages > 15){
-    numPages = 15;
+    if(numPages > 10){
+    numPages = 10;
     }
 
     if(numPages > 1){
@@ -583,11 +598,11 @@ function orderHelper(){
 
                 if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                   md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
-                    $(tr).find('td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).length));
+                    $(tr).find('td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).filter((x) => (!settings.hiddenColumns.includes(x))).length));
                 }
                 else
                 {
-                    $(tr).find('td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).filter((x) => (dataPoints[x].patronsOnly != true)).length));
+                    $(tr).find('td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).filter((x) => (dataPoints[x].patronsOnly != true && !settings.hiddenColumns.includes(x))).length));
                 }
                 tables.append(tr);
             }
