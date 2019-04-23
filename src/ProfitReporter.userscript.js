@@ -1,16 +1,7 @@
-// ==UserScript==
-// @name         MLB The Show Nation Profit Reporter
-// @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.15.2
-// @description  Calculates the current profitability of a card and auto-fills the text box for Buy/Sell Orders with +/- 1 Stub.  DOES NOT AUTOMATE ORDERS AND NEVER WILL!
-// @author       sreyemnayr
-
-// @match        https://mlb19.theshownation.com/community_market/listings/*
-// @grant        unsafeWindow
-// @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=689601
-// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=689639
-
-// ==/UserScript==
+import md5 from './lib/md5.js'
+import settings from './lib/settings.js'
+import showUpdates from './lib/showUpdates.js'
+import cardData from './MLBTSNCardData.library.js'
 
 var currentVersion = "2019.4.15.2";
 
@@ -46,7 +37,7 @@ function xpathToArray(xpath, context=document) {
 
 function reDirectToastr() {
     if ( typeof toastr !== "undefined" && typeof inIframe !== "undefined") {
-    if ( inIframe() ) {
+    if ( inIframe() && !inExtensionIframe() ) {
         toastr = window.top.toastr;
         // $('img').attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
 

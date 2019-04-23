@@ -1,0 +1,348 @@
+th[role=columnheader]:not(.no-sort) {
+	cursor: pointer;
+}
+
+th[role=columnheader]:not(.no-sort):after {
+	content: '';
+	float: right;
+	margin-top: 7px;
+	border-width: 0 8px 8px;
+	border-style: solid;
+	border-color: #404040 transparent;
+	visibility: hidden;
+	opacity: 0;
+	-ms-user-select: none;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	user-select: none;
+}
+
+th[aria-sort=ascending]:not(.no-sort):after {
+	border-bottom: none;
+	border-width: 8px 8px 0;
+}
+
+th[aria-sort]:not(.no-sort):after {
+	visibility: visible;
+	opacity: 0.4;
+}
+
+th[role=columnheader]:not(.no-sort):hover:after {
+	visibility: visible;
+	opacity: 1;
+}
+
+.toggle-content {
+	display: none !important;
+}
+
+.toggle-content.is-visible {
+	display: block !important;
+}
+
+#tm-settings-button{
+  padding-top:10px;
+  padding-left:5px;
+}
+
+#tsn-settings-save-button{
+  padding-top:2px;
+  padding-left:10px;
+  font-size:16pt;
+  color: lime;
+}
+
+#tm-settings-form{
+  display: flex;
+}
+
+.add-pattern-div{
+    margin-top: 6px;
+}
+.loading-layer{
+    position: absolute;
+    top:0px;
+    left:0px;
+    z-index : 10;
+    width: 100%;
+    height: 100%;
+    opacity: 0.7;
+    background-color: white;
+}
+.loading-icon{
+    position: absolute;
+    top:14px;
+    left:50%;
+    z-index : 11;
+}
+.loading-icon-select{
+    position: absolute;
+    top:14px;
+    left:50%;
+    z-index : 11;
+}
+.loading-icon-checkbox{
+    position: absolute;
+    top:7px;
+    left:3px;
+    z-index : 11;
+}
+.glyphicon-refresh-animate {
+    animation: spin .7s infinite linear;
+    padding: 0 0 0 0 !important;
+    margin: 0 0 0 0 !important;
+    transform-origin: center !important;
+    width: 13px; height: 13px;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg);}
+    to { transform: rotate(360deg);}
+}
+form.brutusin-form table, form.brutusin-form input, form.brutusin-form select, form.brutusin-form textarea{
+    width: 99% !important;
+    min-width: 80px;
+    font-size: 10pt;
+    padding: 2px;
+    margin: 0px;
+    border-bottom: 1px solid #cecece; 
+}
+form.brutusin-form input[type=checkbox]{
+    width: auto !important;
+    min-width: auto !important;
+}
+form.brutusin-form  textarea{
+    height: 8em;
+}
+form.brutusin-form table table{
+    border-left:  solid 1px;
+    border-color: lightgray;
+    margin: 4px;
+}
+form.brutusin-form td {
+    vertical-align: top;
+    padding: 4px;
+    white-space: nowrap;
+}
+form.brutusin-form td.prop-name {
+    text-align: right;
+}
+form.brutusin-form td.add-prop-name table {
+    text-align: right;
+    border: none;
+}
+form.brutusin-form td.add-prop-name table td {
+    vertical-align: middle;
+}
+form.brutusin-form td.prop-value {
+    width: 100%;
+    text-align: left;
+}
+form.brutusin-form td.item-index{
+    font-size: 0.8em;
+    color: lightgray;
+    width: 25px;
+    text-align: right;
+}
+form.brutusin-form td.item-action{
+    width: 30px;
+}
+form.brutusin-form .error {
+    border-color: red;
+}
+form.brutusin-form .error-message {
+    color: red;
+}
+button.remove{
+    padding:5px;
+    background: #fff;
+    color:#bb1010;
+    border-radius: 20px;
+    width: 25px;
+    height: 25px;
+    font-size:8pt;
+    line-height:1pt;
+}
+#tm-settings {
+   background-color: #f9f9f9;
+}
+
+.menu-site {     color: #fff;
+    font-weight: 300;
+}
+
+
+.icon {
+    font-size: 10px;
+    margin: 0 0 0 5px;
+    vertical-align: text-bottom
+}
+
+.icon:before {
+    display: inline-block;
+    position: relative;
+    top: 1px;
+    font-family: Icons;
+    font-weight: 400;
+    font-style: normal;
+    line-height: 1;
+    vertical-align: baseline;
+    speak: none;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+
+}
+
+.icon:empty:before {
+    width: 1em;
+    text-align: center;
+    -webkit-box-sizing: content-box;
+    box-sizing: content-box
+}
+
+.settings-icon:before {
+   content: '\e041';
+}
+
+.reload-icon:before {
+    content:'\e0b3';
+}
+
+.check-icon, .circle-check-icon {
+   color: #66FF66;
+}
+
+.check-icon:before {
+   content:'\e033';
+}
+
+.ban-icon {
+  color:#e5e5e5;
+}
+
+.ban-icon:before {
+   content:'\e017';
+}
+
+.circle-check-icon:before {
+   content:'\e038';
+}
+
+.favorites-icon-inactive {
+   color:#e5e5e5 !important;
+}
+
+.favorites-icon-inactive:before {
+   content:'\e017' !important;
+}
+
+.favorites-icon-active {
+   color: #66FF66 !important;
+}
+
+.favorites-icon-active:before {
+   content:'\e038' !important;
+}
+
+.items-results-table td {
+  border-bottom: 1px solid white;
+}
+
+table td, table th {
+    padding: 4px 4px 4px 4px !important;
+}
+
+col:nth-child(2n) {background: rgba(47, 79, 79, 0.05); }
+
+table tr:nth-child(2n) {
+    background-color: rgba(79, 79, 47, 0.05);
+}
+
+thead th:nth-child(2n) {
+    border-right: 1px rgba(47, 79, 79, 0.05) solid; 
+}
+
+tr td:nth-child(2n) {
+    border-right: 1px white solid;
+}
+
+
+table.items-results-table thead {
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+}
+
+table.items-results-table {
+    height: 100%;
+    min-height:500px;
+    max-width: 100%;
+    width: 100%;
+    position: relative;
+    margin: 0;
+    padding-bottom:2em;
+}
+
+table.items-results-table td, table.items-results-table th {
+    min-width:50px;
+    max-width:50px;
+    width: 50px;
+    table-layout:fixed;
+    display:table-cell;
+}
+
+table.items-results-table td.long, table.items-results-table th.long {
+    min-width:100px;
+    max-width:100px;
+    width: 100px;
+
+}
+
+table.items-results-table td.short, table.items-results-table th.short {
+    min-width:20px;
+    max-width:20px;
+    width: 20px;
+}
+
+table.items-results-table tbody {
+    max-height: 100%;
+    overflow: scroll;
+    display: block;
+    margin-top: 48px;
+    margin-bottom:40px;
+
+}
+
+table.items-results-table td:last-child, table.items-results-table th:last-child {
+    width: 60px !important;
+}
+
+table.items-results-table tr td:nth-child(n+18), table.items-results-table thead th:nth-child(n+18) {
+    width: 20px !important;
+    overflow:hidden;
+    text-overflow: ellipsis;
+}
+
+table.items-results-table td a {
+    display:inline-block;
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.layout-inner .scrollable>div {
+    min-height: 500px;
+    overflow-y: hidden;
+}
+
+.title-layout-split-aside {
+    flex-basis: 5% !important;
+    min-width: 5% !important;
+}
+
+.title-layout-split-main {
+    flex-basis: 95% !important;
+    max-width: 95% !important;
+
+}

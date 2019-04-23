@@ -31,4 +31,26 @@ function injectCss() {
     }
 }
 
-injectScript(chrome.runtime.getURL('CompletedOrders.userscript.js'), 'html', 'module');
+
+// Extension ID for notifications stuff
+injectScript('', 'html', 'script', 'var extensionId = "'+chrome.runtime.id+'";');
+
+// Libraries
+//injectScript(chrome.runtime.getURL('lib/md5.js'));
+injectScript(chrome.runtime.getURL('lib/versionCompare.js'));
+injectScript(chrome.runtime.getURL('lib/tableSort.js'));
+//injectScript(chrome.runtime.getURL('lib/brutusinForms.js'));
+
+// Settings Framework
+injectScript(chrome.runtime.getURL('MLBTamperSettingsFramework.library.js'), 'html', 'module');
+
+// Card Data Framework
+injectScript(chrome.runtime.getURL('MLBTSNCardData.library.js'), 'html', 'module');
+
+// Hotkeys
+injectScript(chrome.runtime.getURL('Hotkeys.userscript.js'));
+
+// CSS
+injectCss();
+
+

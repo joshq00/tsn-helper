@@ -1,17 +1,7 @@
-// ==UserScript==
-// @name         MLB The Show Nation Community Market Helper 19
-// @namespace    https://greasyfork.org/en/users/8332-sreyemnayr
-// @version      2019.4.22.1
-// @description  Expand community market search pages to include all pages. More features coming soon.
-// @author       sreyemnayr
-// @match        https://mlb19.theshownation.com/community_market*
-// @exclude      https://mlb19.theshownation.com/community_market/listings/*
-// @exclude      https://mlb19.theshownation.com/community_market/orders/*
-// @require https://greasyfork.org/scripts/40549-mlbtsncarddata/code/MLBTSNCardData.js?version=689601
-// @require https://greasyfork.org/scripts/40553-mlbtsntampersettingsframework-2019/code/MLBTSNTamperSettingsFramework%202019.js?version=689639
-
-// ==/UserScript==
-//var notified = false;
+import md5 from './lib/md5.js'
+import settings from './lib/settings.js'
+import showUpdates from './lib/showUpdates.js'
+import cardData from './MLBTSNCardData.library.js'
 
 var currentVersion = "2019.4.15.3";
 
@@ -402,7 +392,7 @@ function marketHelper(onlyFavorites=false, specificTarget=''){
                 }
 
                 var i = 0;
-                for (dataPoint in dataPoints){
+                for (const dataPoint in dataPoints){
                     if ( !dataPoints[dataPoint].patronsOnly || 
                         md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                         md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
@@ -531,7 +521,7 @@ function orderHelper(){
         var returnString = '';
 
         
-                for (dataPoint in dataPoints){
+                for (const dataPoint in dataPoints){
                     if ( !dataPoints[dataPoint].patronsOnly || 
                         md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                         md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
