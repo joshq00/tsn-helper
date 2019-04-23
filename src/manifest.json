@@ -10,6 +10,7 @@
         "webRequest",
         "webRequestBlocking",
         "activeTab",
+        "tabs",
         "*://mlb19.theshownation.com/*"
       ],
     "externally_connectable": {
@@ -50,7 +51,9 @@
         "Hotkeys.userscript.js",
          "CommunityMarketHelper.userscript.js",
          "ProfitReporter.userscript.js",
-         "CompletedOrders.userscript.js"
+         "CompletedOrders.userscript.js",
+         "backgroundProcesses.library.js",
+         "updateHeaders.content.js"
         ],
     "content_scripts": [
       {
@@ -58,7 +61,7 @@
           "https://mlb19.theshownation.com/*"
         ],
         "all_frames": true,
-        "js": ["defaults.inject.js"],
+        "js": ["defaults.inject.js", "updateHeaders.content.js"],
         "run_at": "document_start"
       },
       {
@@ -83,10 +86,18 @@
       },
       {
         "matches": [
-          "https://mlb19.theshownation.com/community_market/orders/*"
+          "https://mlb19.theshownation.com/community_market/orders/*"  
         ],
         "all_frames": true,
         "js": ["CompletedOrders.inject.js"],
+        "run_at": "document_end"
+      },
+      {
+        "matches": [
+          "https://mlb19.theshownation.com/dashboard"  
+        ],
+        "all_frames": true,
+        "js": ["background.inject.js"],
         "run_at": "document_end"
       }
     ]

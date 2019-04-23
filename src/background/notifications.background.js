@@ -20,7 +20,21 @@ chrome.runtime.onMessageExternal.addListener(
         }
         else if ( request.hasOwnProperty('openBuys') )
         {
+          chrome.tabs.query({active:true}, function(tabs){
+            // send the message to the content script
+            chrome.tabs.sendMessage(tabs[0].id, request);               
+        });
+          
             chrome.browserAction.setBadgeText({text: `${request.openBuys}/${request.openSells}`})
+        }
+        else if ( request.hasOwnProperty('balancePlusBuysAmt') )
+        {
+          chrome.tabs.query({active:true}, function(tabs){
+            // send the message to the content script
+            chrome.tabs.sendMessage(tabs[0].id, request);               
+        });
+          
+           
         }
 
         sendResponse({msg: "Message"});

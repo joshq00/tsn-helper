@@ -1,6 +1,7 @@
 import md5 from './lib/md5.js'
 import settings from './lib/settings.js'
 import showUpdates from './lib/showUpdates.js'
+import moment from './lib/moment.js'
 
 var currentVersion = "2019.4.15.2";
 
