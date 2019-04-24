@@ -9,6 +9,10 @@ function injectScript(file_path, tag='html', type='script', text='') {
     else if ( type == 'module' ) {
     script.setAttribute('type', 'module');
     }
+    else if ( type == 'asyncdefer' ) {
+        script.setAttribute('async', '');
+        script.setAttribute('defer', '');
+    }
     else {
         script.setAttribute('rel', 'stylesheet');
         script.setAttribute('media', 'screen');
@@ -31,4 +35,6 @@ function injectCss() {
     }
 }
 
+injectScript('', 'html', 'script', 'var onloadCallback = function() { alert("grecaptcha is ready"); };')
+injectScript('https://www.gstatic.com/recaptcha/api2/v1554100419869/recaptcha__en.js?onload=onloadCallback&render=explicit', 'html', 'asyncdefer');
 injectScript(chrome.runtime.getURL('CommunityMarketHelper.userscript.js'), 'html', 'module');

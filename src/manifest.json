@@ -73,7 +73,8 @@
           "https://mlb19.theshownation.com/community_market/orders/*"
           ],
           "all_frames": true,
-          "js": ["CommunityMarketHelper.inject.js"]
+          "js": ["CommunityMarketHelper.inject.js"],
+          "run_at": "document_start"
 
       },
       {

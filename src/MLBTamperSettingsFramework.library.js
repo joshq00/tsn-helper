@@ -1,5 +1,5 @@
 import md5 from './lib/md5.js'
-import {settings, schema} from './lib/settings.js'
+import {settings, schema, saveSettings} from './lib/settings.js'
 import brutusin from './lib/brutusinForms.js'
 import { inIframe, inExtensionIframe, show, hide, toggle } from './lib/helpers.js'
 import moment from './lib/moment.js'
@@ -141,10 +141,9 @@ function tsnGo() {
        saveButton.id = 'tsn-settings-save';
       settingsDiv.appendChild(saveButton);
       saveButton.addEventListener('click', function(e){
-          settings = bf.getData();
-          settings.superSecretMd5 = md5(settings.superSecret);
+        saveSettings(bf.getData());
           // console.log(settings);
-          localStorage.setItem('tsn-settings', JSON.stringify(settings));
+          //localStorage.setItem('tsn-settings', JSON.stringify(settings));
           toastr["success"]("TSN Helper Settings Updated","Saved");
 
       //console.log();
@@ -155,10 +154,10 @@ function tsnGo() {
        saveReloadButton.style.margin = '4px';
       settingsDiv.appendChild(saveReloadButton);
       saveReloadButton.addEventListener('click', function(e){
-          settings = bf.getData();
-          settings.superSecretMd5 = md5(settings.superSecret);
+          saveSettings(bf.getData());
+          //settings.superSecretMd5 = md5(settings.superSecret);
           // console.log(settings);
-          localStorage.setItem('tsn-settings', JSON.stringify(settings));
+          //localStorage.setItem('tsn-settings', JSON.stringify(settings));
           toastr["success"]("TSN Helper Settings Updated","Saved");
           window.location.reload()
 
@@ -222,9 +221,9 @@ function tsnGo() {
             a.appendChild(saveButton2);
           li2.appendChild(a);
           saveButton2.addEventListener('click', function(e){
-              settings = bf.getData();
+            saveSettings(bf.getData());
               // console.log(settings);
-              localStorage.setItem('tsn-settings', JSON.stringify(settings));
+             // localStorage.setItem('tsn-settings', JSON.stringify(settings));
               toastr["success"]("TSN Helper Settings Updated","Saved");
 
           //console.log();

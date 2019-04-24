@@ -559,7 +559,7 @@ function orderHelper(){
     //tables.style.flexDirection = 'column';
     var numPages = 1;
         try {numPages = parseInt($('.pagination').find('a')[$('.pagination').find('a').length-2].innerText);}
-        catch(error) { console.log(error);}
+        catch(error) { true; }
        // console.log(numPages);
     if(numPages > 10){
     numPages = 10;
@@ -629,9 +629,9 @@ var refreshInterval = interval ? interval : settings.refreshMarketInterval * 100
 }
 
 
-(function() {
+function go() {
     'use strict';
-
+    if( typeof $ !== 'undefined'  && $('.items-results-table thead').length > 0){
 
     //$('.marketplace-main-heading').children()[0].append(" ("+$('.order').length+")");
     //$('.marketplace-main-heading').append('<div style="float:right">Refresh interval: <input id="refresh-interval" size="5" value=".5"></input></div>');
@@ -641,7 +641,7 @@ var refreshInterval = interval ? interval : settings.refreshMarketInterval * 100
 
 
 
-     helperFrame = document.createElement('iframe');
+    helperFrame = document.createElement('iframe');
     helperFrame.id = 'helperFrame';
     helperFrame.style.webkitTransform = 'scale(1.5)';
     helperFrame.style.transformOrigin = '0 0';
@@ -670,8 +670,13 @@ var refreshInterval = interval ? interval : settings.refreshMarketInterval * 100
     orderHelper();
     }
 
+} else {
+    setTimeout(go, 200);
+}
+
     //setTimeout(completedOrders,(1000*15));
 
 
 
-})();
+}
+go();

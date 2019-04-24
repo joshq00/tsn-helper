@@ -17,22 +17,26 @@ var settings_defaults = {
 
 // Get/init localStorage settings
 
-function initSettings() {
-        let settings = {};
+function initSettings(settings={}) {
+        
         if(localStorage.hasOwnProperty('tsn-settings')){
         settings = JSON.parse(localStorage.getItem('tsn-settings'));
         }
 
-        for (var prop in settings_defaults) {
-            if ( !settings.hasOwnProperty(prop) )
-            {
-                settings[prop] = settings_defaults[prop]
-            }
-        } 
-        settings.superSecretMd5 = md5(settings.superSecret);
-        localStorage.setItem('tsn-settings',JSON.stringify(settings));
-        return settings;
+        return saveSettings(settings);
     
+}
+
+function saveSettings(settings={}) {
+    for (var prop in settings_defaults) {
+        if ( !settings.hasOwnProperty(prop) )
+        {
+            settings[prop] = settings_defaults[prop]
+        }
+    }
+    settings.superSecretMd5 = md5(settings.superSecret); 
+    localStorage.setItem('tsn-settings',JSON.stringify(settings));
+    return settings;
 }
 
 
@@ -320,4 +324,5 @@ return schema;
 
 export const settings = initSettings();
 export const schema = initSchema();
+export {saveSettings};
 export default settings;
