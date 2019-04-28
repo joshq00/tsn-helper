@@ -35,6 +35,4 @@ function injectCss() {
     }
 }
 
-injectScript('', 'html', 'script', 'var onloadCallback = function() { alert("grecaptcha is ready"); };')
-injectScript('https://www.gstatic.com/recaptcha/api2/v1554100419869/recaptcha__en.js?onload=onloadCallback&render=explicit', 'html', 'asyncdefer');
 injectScript(chrome.runtime.getURL('CommunityMarketHelper.userscript.js'), 'html', 'module');

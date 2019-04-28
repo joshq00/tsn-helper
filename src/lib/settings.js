@@ -8,6 +8,8 @@ var settings_defaults = {
     "coolness": 10, 
     "superSecret": "", 
     "refreshMarketInterval": 60, 
+    "refreshMarketIntervalFavorites": 60,
+    "refreshMarketIntervalOpen": 20,
     "showBuyFrame": false, 
     "ignoreSoloBuySell": false, 
     "webNotifications": false,
@@ -54,6 +56,22 @@ function initSchema() {
                     "default": 15,
                     "required": true
                     },
+                "refreshMarketIntervalFavorites": {
+                        "type": "integer",
+                            "title": "[ Patron Feature ] Refresh Interval in seconds for FAVORITES (Community Market Helper)",
+                            "description": "Number of seconds between card info refreshes on community market - Only applies to favorited items. [0 = off]",
+                            "default": 60,
+                            "required": true,
+                            "readOnly": true
+                            },
+                "refreshMarketIntervalOpen": {
+                                "type": "integer",
+                                    "title": "[ Patron Feature ] Refresh Interval in seconds for cards with OPEN ORDERS (Community Market Helper)",
+                                    "description": "Number of seconds between card info refreshes on community market - Only applies to open-order items. [0 = off]",
+                                    "default": 20,
+                                    "required": true,
+                                    "readOnly": true
+                                    },
                 "heatFactor": {
                     "type": "string",
                     "title": "[ Patron Feature ] Heat Factor",
@@ -98,7 +116,7 @@ function initSchema() {
                     },
                 "webNotifications": {
                     "type": "boolean",
-                    "title": "In-page notifications?",
+                    "title": "[ Patron Feature ] In-page notifications?",
                     "description": "[Patrons Only Feature ] Receive notifications on the website for completed buys/sells?",
                     "default": false,
                     "required": true,
@@ -106,7 +124,7 @@ function initSchema() {
                 },
                 "chromeNotifications": {
                     "type": "boolean",
-                    "title": "Chrome notifications?",
+                    "title": "[ Patron Feature ] Chrome notifications?",
                     "description": "[Patrons Only Feature ] Receive notifications from the browser for completed buys/sells?",
                     "default": false,
                     "required": true,
@@ -136,13 +154,7 @@ function initSchema() {
 
         schema.properties = Object.assign({}, schema.properties, {
 
-                "refreshMarketInterval": {
-                "type": "integer",
-                    "title": "Refresh Interval in seconds (Community Market Helper)",
-                    "description": "Number of seconds between card info refreshes on community market - Only applies to favorited items. [0 = off]",
-                    "default": 0,
-                    "required": true
-                    },
+                
             "showBuyFrame": {
                 "type": "boolean",
                     "title": "Show helper iframe?",

@@ -346,3 +346,27 @@ table.items-results-table td a {
     max-width: 95% !important;
 
 }
+
+.panel-responsive .panel-responsive-large, .dashboard-user-icon {
+    display: none !important;
+}
+
+.panel-responsive .panel-responsive-small {
+    display: block !important;
+}
+
+.layout-inner {
+    flex-direction: column !important;
+}
+
+.panel-responsive .panel-responsive-toggle {
+    display: flex !important;
+    flex-direction: row !important;     
+}
+
+.mini-widget, .sidebar-section-top .sidebar-section-top-inner, .layout-heading, .sidebar-section-bottom {
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+

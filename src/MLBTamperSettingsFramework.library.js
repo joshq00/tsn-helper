@@ -6,49 +6,25 @@ import moment from './lib/moment.js'
 
 function tsnGo() {
     'use strict';
-    if(typeof $ !== "undefined" &&  $('.header-logo a').length > 0){
+    if(typeof $ !== "undefined" &&  $('.header-logo a').length > 0 && document.getElementsByTagName('footer').length > 0){
     
     var doc = document;
     // Add hidden settings div
-    var logo = $('.header-logo')[0];
-    logo.style.display = 'flex';
-    var outerStubsDiv = doc.createElement('div');
-    outerStubsDiv.style.color = 'white';
-    outerStubsDiv.style.display = 'inline-block';
-    outerStubsDiv.style.marginLeft = '5px';
-    var stubsDiv = doc.createElement('div');
-    stubsDiv.id = 'helperStubsDiv';
-    stubsDiv.style.display = 'flex';
-    stubsDiv.style.flexDirection = 'column';
-    var stubsSubDiv = doc.createElement('div');
-    stubsSubDiv.id = 'helperStubsSubDiv';
-    stubsSubDiv.style.display = 'flex';
-    stubsSubDiv.style.flexDirection = 'column';
-    outerStubsDiv.append(stubsDiv);
-    outerStubsDiv.append(stubsSubDiv);
     
-    var stubsDiv2 = doc.createElement('div');
-    stubsDiv2.id = 'helperStubsDiv2';
-    stubsDiv2.style.color = 'white';
-    stubsDiv2.style.display = 'inline-block';
-    stubsDiv2.style.marginLeft = '5px';
-    logo.append(outerStubsDiv);
-    logo.append(stubsDiv2);
-    var header = doc.getElementsByClassName('header-container')[0];
-    var headerFragment = doc.createDocumentFragment();
-    var settingsDiv = doc.createElement('div');
+    var header = document.getElementsByClassName('header-container')[0];
+    var headerFragment = document.createDocumentFragment();
+    var settingsDiv = document.createElement('div');
       settingsDiv.id = 'tm-settings';
       settingsDiv.classList.add('header-inner');
       settingsDiv.classList.add('toggle-content');
-      var settingsHeader = doc.createElement('h2');
+      var settingsHeader = document.createElement('h2');
       settingsHeader.innerHTML = 'TSN Helper Settings';
       settingsDiv.appendChild(settingsHeader);
-      var settingsForm = doc.createElement('form');
+      var settingsForm = document.createElement('form');
       //settingsForm.id = 'tm-settings-form';
          // Create the settings form programatically
          var BrutusinForms = brutusin["json-forms"];
          var bf = BrutusinForms.create(schema);
-         console.log(bf);
          BrutusinForms.addDecorator(function (element, schema) {
              if(element.tagName)
              {
@@ -71,7 +47,7 @@ function tsnGo() {
                              var itemUrl = item.template.match(/href=['"]([^'"?]+)/)[1];
                              item.template = item.template.replace('<a href','<span');
                              item.template = item.template.replace('href','data-href');
-                             var itemLi = doc.createElement('li');
+                             var itemLi = document.createElement('li');
                              itemLi.innerHTML = item.template;
                              itemLi.addEventListener('click', function(e){
                                  element.parentNode.parentNode.parentNode.parentNode.querySelector('input.card-name-input').value = itemName;
@@ -135,7 +111,7 @@ function tsnGo() {
              });
          };
          bf.render(settingsDiv, settings);
-      var saveButton = doc.createElement('button');
+      var saveButton = document.createElement('button');
        saveButton.innerHTML = 'Save';
     saveButton.style.margin = '4px';
        saveButton.id = 'tsn-settings-save';
@@ -148,7 +124,7 @@ function tsnGo() {
 
       //console.log();
       });
-    var saveReloadButton = doc.createElement('button');
+    var saveReloadButton = document.createElement('button');
        saveReloadButton.innerHTML = 'Save &amp; Refresh';
        saveReloadButton.id = 'tsn-settings-save-refresh';
        saveReloadButton.style.margin = '4px';
@@ -163,7 +139,7 @@ function tsnGo() {
 
       //console.log();
       });
-    var closeButton = doc.createElement('button');
+    var closeButton = document.createElement('button');
        closeButton.innerHTML = 'Cancel';
        closeButton.id = 'tsn-settings-close';
     closeButton.style.margin = '4px';
@@ -171,8 +147,8 @@ function tsnGo() {
       closeButton.addEventListener('click', function(e){
 
           toggle(settingsDiv);
-          hide(doc.getElementById('tsn-settings-save-button0'));
-          hide(doc.getElementById('tsn-settings-save-button1'));
+          hide(document.getElementById('tsn-settings-save-button0'));
+          hide(document.getElementById('tsn-settings-save-button1'));
 
       //console.log();
       });
@@ -184,13 +160,14 @@ function tsnGo() {
     contentContainer.prepend(headerFragment);
 
     // Add settings icon to navigation
-	var menus = doc.getElementsByClassName('menu-site');
-    $(menus).each(function(menu){
-        var buttonFragment = doc.createDocumentFragment();
-        var li = doc.createElement('li');
-        var a = doc.createElement('a');
+    var menus = document.getElementsByClassName('menu-site');
+    for (var menu = 0; menu < menus.length; menu++){
+    //$(menus).each(function(menu){
+        var buttonFragment = document.createDocumentFragment();
+        var li = document.createElement('li');
+        var a = document.createElement('a');
         a.href="#";
-        var settingsButton = doc.createElement('span');
+        var settingsButton = document.createElement('span');
         settingsButton.classList.add('settings-icon');
         settingsButton.classList.add('icon');
         // settingsButton.classList.add('button-small');
@@ -198,11 +175,15 @@ function tsnGo() {
           
           a.appendChild(settingsButton);
           li.appendChild(a);
+          var saveButtonId = 'tsn-settings-save-button'+menu;
+          var menuIsOne = menu == 1;
           li.addEventListener('click', function(){
-           toggle(doc.getElementById('tm-settings'));
-              toggle(doc.getElementById('tsn-settings-save-button'+menu));
-              menu == 1 ? $('.site-offcanvas-controls-close')[0].click(): true;
-          doc.getElementById('tm-settings').focus();
+           toggle(document.getElementById('tm-settings'));
+              
+              menuIsOne ? $('.site-offcanvas-controls-close')[0].click(): true;
+              document.getElementById('tm-settings').focus();
+              toggle(document.getElementById(saveButtonId));
+                
           });
 
 
@@ -210,13 +191,13 @@ function tsnGo() {
 
 
           buttonFragment.appendChild(li);
-        var li2 = doc.createElement('li');
-         var saveButton2 = doc.createElement('span');
+        var li2 = document.createElement('li');
+         var saveButton2 = document.createElement('span');
            saveButton2.classList.add('check-icon');
             saveButton2.classList.add('icon');
            saveButton2.id = 'tsn-settings-save-button'+menu;
         saveButton2.classList.add('toggle-content');
-            a = doc.createElement("a");
+            a = document.createElement("a");
             a.href="#";
             a.appendChild(saveButton2);
           li2.appendChild(a);
@@ -231,7 +212,7 @@ function tsnGo() {
         buttonFragment.appendChild(li2);
            // console.log(menu);
         menus[menu].appendChild(buttonFragment);
-    });
+    }
 
     
 
@@ -252,6 +233,7 @@ function tsnGo() {
                       "hideDuration":20,
                       "preventDuplicates": true,
                       "positionClass": "toast-top-right",
+                      "escapeHtml": false,
                      };
               }
             });
@@ -293,7 +275,7 @@ function tsnGo() {
             
         }
         else{
-            console.log("Still not set");
+            console.log("Waiting to hijack toastr...");
             setTimeout(waitForToastr, 250);
         }
     }
@@ -304,7 +286,8 @@ function tsnGo() {
 
         var patreonDiv = document.createElement('div');
         patreonDiv.innerHTML = 'Using MLBTSN Helper by sreyemnayr. Unlock more features by saying thanks! <a href="https://www.patreon.com/bePatron?u=18905935" data-patreon-widget-type="become-patron-button">Become a Patron</a><script async src="https://c6.patreon.com/becomePatronButton.bundle.js"></script>';
-        $('footer').prepend(patreonDiv);
+        document.getElementsByTagName('footer')[0].insertBefore(patreonDiv, document.getElementsByTagName('footer')[0].firstChild);
+        // $('footer').prepend(patreonDiv);
 
         // Display update dialog
         

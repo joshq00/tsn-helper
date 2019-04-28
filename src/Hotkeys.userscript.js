@@ -46,6 +46,8 @@ function doc_keyUp(e) {
 (function() {
     'use strict';
     document.addEventListener('keyup', doc_keyUp, false);
+
+    
     //https://mlb19.theshownation.com/mlb_fetch_community_psn_token_failed#
     function checkLogin() {
         if ( typeof $ !== "undefined" && $('a').length > 0 ) {
@@ -61,3 +63,13 @@ function doc_keyUp(e) {
     checkLogin();
 
 })();
+
+function disableConfirmations() {
+    if (document.getElementsByTagName('footer').length > 0) {
+        for ( var button of document.querySelectorAll("button[data-confirm='Are you sure?'") ) { button.dataset["confirm"] = false }
+    }
+    else {
+        setTimeout(disableConfirmations, 200);
+    }
+}
+disableConfirmations();

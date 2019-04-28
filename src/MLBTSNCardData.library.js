@@ -218,7 +218,13 @@ function cardData(b, doc=false, id=''){
 
     var rating = $($(b).find('.card-overall')[0]).text();
     var buyForm = $(b).find('#create-buy-order-form')[0];
+    var buyInput = buyForm.querySelector('#price');
+    var buyButton = buyForm.querySelector('button');
+    buyInput.setAttribute('placeholder', '');
     var sellForm = $(b).find('#create-sell-order-form')[0];
+    var sellInput = sellForm.querySelector('#price');
+    sellInput.setAttribute('placeholder', '');
+    var sellButton = sellForm.querySelector('button');
     var buyNowForm = $(b).find('.marketplace-card-order-now form')[0];
     var sellNowForm = $(b).find('.marketplace-card-order-now form')[1];
 
@@ -278,8 +284,8 @@ function cardData(b, doc=false, id=''){
     var winningBuy = false;
     var winningSell = false;
 
-    var openBuys = 0;
-    var openSells = 0;
+    var numBuys = 0;
+    var numSells = 0;
     var cancelBuyButtons = [];
     var cancelSellButtons = [];
     var buyOrdersHeader = $(b).find("th:contains('Order Date') ~ th:contains('Buy Order Price')")[0];
@@ -302,7 +308,7 @@ function cardData(b, doc=false, id=''){
                 }
                 cancelButton.dataset["confirm"] = false
                 cancelBuyButtons.push(cancelForm);
-                openBuys++;
+                numBuys++;
                 //console.log(cancelForm);
             }
             );
@@ -331,7 +337,7 @@ function cardData(b, doc=false, id=''){
                 }
                 cancelButton.dataset["confirm"] = false
                 cancelSellButtons.push(cancelForm);
-                openSells++;
+                numSells++;
                 //console.log(cancelForm);
             }
             );
@@ -487,6 +493,16 @@ function cardData(b, doc=false, id=''){
 
     var perExchange = Math.round ( (exchangeValue / (sellNow + 1) * 100) ) / 100 ;
 
+    sellInput.value = winningSell ? parseInt(buyNow).toLocaleString() : parseInt(buyNow - 1).toLocaleString();
+    buyInput.value = winningBuy ? parseInt(sellNow).toLocaleString() : parseInt(sellNow + 1).toLocaleString();
+    sellInput.setAttribute('data-value', sellInput.value);
+    buyInput.setAttribute('data-value', buyInput.value);
+    buyButton.innerHTML = "+BUY";
+    buyButton.style.padding = "1px";
+    buyButton.style.height = "100%"
+    sellButton.innerHTML = "+SELL";
+    sellButton.style.padding = "1px";
+    sellButton.style.height = "100%"
 
     return {
         'name': name,
@@ -530,9 +546,9 @@ function cardData(b, doc=false, id=''){
         'cancelButtons': cancelBuyButtons + cancelSellButtons,
         'cancelBuyButtons': cancelBuyButtons,
         'cancelSellButtons': cancelSellButtons,
-        'openBuys': openBuys,
-        'openSells': openSells,
-        'openOrders': openBuys + openSells,
+        'numBuys': numBuys,
+        'numSells': numSells,
+        'openOrders': numBuys + numSells,
         'winningBuy': winningBuy,
         'winningSell': winningSell,
         'balance': balance,

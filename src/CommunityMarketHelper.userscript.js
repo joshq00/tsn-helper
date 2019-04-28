@@ -156,7 +156,8 @@ findReplaceSeries.push( ['Rookie','R'] );
 findReplaceSeries.push( ['Breakout','BO'] );
 
 var notifiedURL = '';
-var myTimeout;
+var favoritesTimeout;
+var openTimeout;
 var firstTime = {};
 var firstTimeSell = {};
 var notified = {};
@@ -202,25 +203,31 @@ var dataPoints = {
 }
 
 
-function marketHelper(onlyFavorites=false, specificTarget=''){
+function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
    // console.log("Debug1");
     
    // console.log("Debug2");
 
-
+    console.log(onlyFavorites, specificTarget, onlyOpen);
     // $('.marketplace-filter-item-stats').hide();
     $('.item-name').css('width','20%');
 
     var cardSelector;
     if(onlyFavorites) { 
-        clearTimeout(myTimeout); 
+        clearTimeout(favoritesTimeout); 
         cardSelector = $(tables).find('td:nth-child(1):has(.favorites-icon-active) ~ td:nth-child(3) a'); 
     }
+    else if (onlyOpen) {
+        clearTimeout(openTimeout);
+        cardSelector = $(tables).find('td:nth-child(3) a[data-openorders="true"]');
+    }
     else if (specificTarget != ''){
+        console.log("Specific Target", specificTarget);
         cardSelector = $(tables).find('td:nth-child(3) a[href="'+specificTarget+'"]');
 
     } else { 
-        clearTimeout(myTimeout); 
+        clearTimeout(favoritesTimeout); 
+        clearTimeout(openTimeout);
         cardSelector = $(tables).find('td:nth-child(3) a'); 
     }
         var howMany = cardSelector.length;
@@ -336,6 +343,9 @@ function marketHelper(onlyFavorites=false, specificTarget=''){
 
                 var nameTd = $(this).parent().parent().find('td:nth-child(3)');
                 nameTd[0].classList.add("long");
+
+                var nameLink = $(this).parent().parent().find('td:nth-child(3) a');
+                $(nameLink[0]).attr("data-openOrders", card.openOrders > 0 ? 'true' : 'false');
 
                 var ovrTd = $(this).parent().parent().find('td:nth-child(4)');
                 ovrTd[0].classList.add("short");
@@ -479,16 +489,25 @@ function marketHelper(onlyFavorites=false, specificTarget=''){
                 $($(card.sellForm).find('#price')[0]).val(card.winningSell ? card.buyNow : card.buyNow-1);
                 card.sellForm.target = "helperFrame";
                 //$($(this).parent().parent().children()[1]).append("<div class=\"helperDiv\" style=\"background-color:yellow; color:red\"><span class=\"stubs\"> </span> "+thisSellNowPrice+"</div>");
-            firstTime[url] = 1;
+                firstTime[url] = 1;
                 document.getElementById('helperStubsDiv').innerHTML = card.balanceStr;
 
 
-        if (howManyDone == howMany) {
-            
-            sort.refresh();
-            
-            if (specificTarget == '' ) { setRefresh(); }
-            }
+                if (howManyDone == howMany) {
+                    
+                    sort.refresh();
+                    
+                    if (specificTarget == '' ) {
+                        if(onlyOpen) {
+                            setRefresh(undefined, 'open');
+                        } else if (onlyFavorites) {
+                            setRefresh(undefined, 'favorites');
+                        } else {
+                            setRefresh(undefined, 'favorites'); 
+                            setRefresh(undefined, 'open');
+                        }
+                    }
+                }
             }
         });
 
@@ -619,12 +638,21 @@ function orderHelper(){
 //firstTime = false;
 }
 
-function setRefresh(interval=undefined) {
+function setRefresh(interval=undefined, setWhich='favorites') {
     // console.log("Debug3");
+    console.log(setWhich);
 
-var refreshInterval = interval ? interval : settings.refreshMarketInterval * 1000 ;
-    if (refreshInterval > 0){
-        myTimeout = setTimeout(marketHelper.bind(null, true),refreshInterval);
+    if (setWhich == 'favorites') {
+        var refreshInterval = interval ? interval : settings.refreshMarketIntervalFavorites * 1000 ;
+            if (refreshInterval > 0){
+                favoritesTimeout = setTimeout(marketHelper.bind(null, true),refreshInterval);
+            }
+    }
+    if (setWhich == 'open') {
+        var refreshInterval = interval ? interval : settings.refreshMarketIntervalOpen * 1000 ;
+            if (refreshInterval > 0){
+                openTimeout = setTimeout(marketHelper.bind(null, false, '', true),refreshInterval);
+            }
     }
 }
 
@@ -637,7 +665,7 @@ function go() {
     //$('.marketplace-main-heading').append('<div style="float:right">Refresh interval: <input id="refresh-interval" size="5" value=".5"></input></div>');
 
 
-    //myTimeout = setTimeout(orderHelper,60000);
+    //favoritesTimeout = setTimeout(orderHelper,60000);
 
 
 
@@ -670,7 +698,52 @@ function go() {
     orderHelper();
     }
 
+    window.addEventListener('message', receiver, false);
+    function receiver(e) {
+        if(e.data.hasOwnProperty('itemName'))
+         {
+            if(settings.webNotifications) {
+                var url = `https://mlb19.theshownation.com/community_market/listings/${e.data.itemId}`
+                fetch(url).
+                then( function(response) {
+                if (response.ok) {
+                    return response.text()
+                  } else {
+                    var error = new Error(response.statusText)
+                    error.response = response
+                    throw error
+                  }
+            } ).
+            then( function (text) {
+                text = text.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
+                text = text.replace(/<script>[^<]+<\/script>/gi, "");
+                text = text.replace(/<link[^>]+>/gi, "");
+                var card = cardData(text, false, e.data.itemId);
+                $(card.buyForm).css('display','flex');
+                card.buyForm.target = "helperFrame";
+
+
+                //$(this).parent().append(card.sellForm);
+                //$(theForm).css('width','50%');
+                $(card.sellForm).css('display','flex');
+                card.sellForm.target = "helperFrame";
+
+                toastr.info(`${e.data.itemName} ${e.data.itemBuyOrSell} for ${e.data.itemPrice} ${card.buyForm.outerHTML.replace(/data-value/g,'value')} ${card.sellForm.outerHTML.replace(/data-value/g,'value')}`);
+            }).catch(function(e) { console.log(e)});
+
+              
+                
+                }
+             // <a href="/community_market/listings/58972dceed371780056fb58a04f7ce7e" target="blank">Rival</a>
+             marketHelper(false, `/community_market/listings/${e.data.itemId}`);
+             // console.log(e.data)
+         }
+        
+        return Promise.resolve("Dummy response to keep the console quiet");
+    }
+
 } else {
+    console.log("Waiting ... ");
     setTimeout(go, 200);
 }
 

@@ -76,9 +76,9 @@ reDirectToastr();
    var cancelTarget;
 
 function waitForElement(){
-    if(typeof cardData !== "undefined" && typeof settings !== "undefined" && typeof $ !== "undefined" && $('#helperStubsDiv').length > 0){
+    if(typeof cardData !== "undefined" && typeof settings !== "undefined" && typeof $ !== "undefined" && document.getElementsByTagName('body').length > 0){
         var card = cardData(document, true, window.location.pathname.split('/')[window.location.pathname.split('/').length -1]);
-        document.getElementById('helperStubsDiv').innerHTML = card.balanceStr;
+        // document.getElementById('helperStubsDiv').innerHTML = card.balanceStr;
 
 
 
@@ -401,7 +401,6 @@ page.getElementsByClassName("title-layout-main")[0].prepend(cardDataDiv);
     
     moveSellForm(card.sellable); 
 
-    for ( var button of document.querySelectorAll("button[data-confirm='Are you sure?'") ) { button.dataset["confirm"] = false }
 
     // for ( var table of Array.from(document.querySelectorAll(".title-widget-main table")).slice(0,-2) ) { mainHeading.prepend(table); table.style.backgroundColor = "white"; table.style.color = "black"; }
 
@@ -424,21 +423,21 @@ page.getElementsByClassName("title-layout-main")[0].prepend(cardDataDiv);
     //checkSellOrders();
     //checkBuyOrders();
     $(card.buyForm).css('display','flex');
-                $($(card.buyForm).find('#price')[0]).val(card.winningBuy ? card.sellNow : card.sellNow+1);
+                //$($(card.buyForm).find('#price')[0]).val(card.winningBuy ? card.sellNow : card.sellNow+1);
                // card.buyForm.target = "helperFrame";
 
 
                 //$(this).parent().append(card.sellForm);
                 //$(theForm).css('width','50%');
                 $(card.sellForm).css('display','flex');
-                $($(card.sellForm).find('#price')[0]).val(card.winningSell ? card.buyNow : card.buyNow-1);
+                //$($(card.sellForm).find('#price')[0]).val(card.winningSell ? card.buyNow : card.buyNow-1);
                // card.sellForm.target = "helperFrame";
 
     // var formsDiv = document.createElement('div');
     // mainHeading.append(formsDiv);
     //$(formsDiv).css('display','flex');
     // $(formsDiv).css('float','right');
-
+ 
     // $(formsDiv).append(card.buyForm);
     // $('#create-buy-order-form').css('width','30%');
     // $('#create-buy-order-form').css('float','left');

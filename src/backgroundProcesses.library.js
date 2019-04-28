@@ -7,7 +7,7 @@ import moment from './lib/moment.js'
 
 var topOrderHashPageOne = '';
 
-function completedOrdersCheck(page=1) {
+function completedOrdersCheck(page=1, topOrderHashPageOne = '') {
     if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' || md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
     if ( typeof $ !== "undefined" && typeof toastr !== "undefined") {
 var url = 'https://mlb19.theshownation.com/community_market/orders/completed';
@@ -34,6 +34,99 @@ if(localStorage.hasOwnProperty('tsn-completedHash')){
 
         // console.log(url);
 
+        fetch(url).
+            then( function(response) {
+                if (response.ok) {
+                    return response.text()
+                  } else {
+                    var error = new Error(response.statusText)
+                    error.response = response
+                    throw error
+                  }
+            } ).
+            then( function (text) {
+                text = text.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
+                text = text.replace(/<script>[^<]+<\/script>/gi, "");
+                text = text.replace(/<link[^>]+>/gi, "");
+                var frag = document.createRange().createContextualFragment(text);
+                var allOrders = frag.querySelectorAll('.completed-orders-table tbody tr');
+                var topOrder = allOrders[0];
+                const topOrderHash = md5(topOrder.innerHTML);
+
+                if ( page == 1 ) { topOrderHashPageOne = topOrderHash; }
+
+                console.log(topOrderHash, topOrderHashPageOne, lastCompletedOrderHash);
+
+                if (topOrderHash != lastCompletedOrderHash) {
+
+                    
+
+                    var foundLast = false;
+
+                    for ( const orderTr of allOrders ) {
+                        if ( !foundLast ) {
+                            if ( md5(orderTr.innerHTML) == lastCompletedOrderHash  ) {
+                                foundLast = true;
+                                localStorage.setItem('tsn-completedHash', topOrderHashPageOne);
+                            }
+                            else {
+                                var item = orderTr.querySelector('a');
+                                var itemName = item.textContent;
+                                var itemId = item.href.match(/[^\/]+$/g)[0];
+
+                                var itemBuySellInfo =orderTr.querySelector('td:nth-child(2)')
+                                var itemBuyOrSell = itemBuySellInfo.innerText.match(/([^\s]+)\sfor/)[1];
+                                var itemPrice = parseInt( itemBuySellInfo.innerText.replace(/,/,'').match(/\d+/)[0] );
+
+                                var saleDateTd = orderTr.querySelector('td:nth-child(3)');
+                                var dateStringTemplate = "M/D/YYYY h:mmA Z";
+                                var thisDate = moment(saleDateTd.textContent.replace(/PDT/g,"-0700"), dateStringTemplate);
+
+                                if (itemBuyOrSell != 'Sold'){
+                    
+                                    if(!localDataBuys[itemId]){
+                                        localDataBuys[itemId] = {'date': thisDate, 'amount': itemPrice };
+                                    }
+                                    else if (moment(localDataBuys[itemId]['date']).isBefore(thisDate) ) {
+                                        localDataBuys[itemId] = {'date': thisDate, 'amount': itemPrice };
+                                    }
+                                    
+                                }
+                                if ( thisDate.isSame(moment(), 'day') ) {
+                                    
+                                    chrome.runtime.sendMessage(extensionId, {"notifyChrome": settings.chromeNotifications, "notifyWeb": settings.webNotifications, "itemName": itemName, "itemBuyOrSell": itemBuyOrSell, "itemPrice": itemPrice, "itemId": itemId}, function(response) {
+                                        console.log(response.msg);
+                                    });
+                                    
+                                    
+                                    
+                                }
+                            }
+
+                        }
+                        else {
+                            localStorage.setItem('tsn-completedHash', topOrderHashPageOne );
+                        }
+                        
+                    }
+                    localStorage.setItem('tsn-purchaseHistory',JSON.stringify(localDataBuys));
+                    if(!foundLast &&  lastCompletedOrderHash !=  md5('') && page <= 10) {
+                        completedOrdersCheck(page+1, topOrderHashPageOne);
+                    }
+                    else {
+                        localStorage.setItem('tsn-completedHash', topOrderHashPageOne );
+                        openOrdersInterval = setInterval(openOrdersCheck,5000);
+                    }
+                }
+                else {
+                    localStorage.setItem('tsn-completedHash', topOrderHashPageOne );
+                    openOrdersInterval = setInterval(openOrdersCheck,5000);
+
+                }
+            }).catch( function(e) {
+                console.log(e);
+            });
+/*
         $.ajax({url:url}).done(function(b){
             b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
            // console.log(b);
@@ -47,13 +140,13 @@ if(localStorage.hasOwnProperty('tsn-completedHash')){
             var topOrder = $(b).find('.completed-orders-table tbody tr')[0];
             const topOrderHash = md5(topOrder.innerHTML);
             
-            console.log(topOrderHash, lastCompletedOrderHash);
+            //console.log(topOrderHash, lastCompletedOrderHash);
 
             if (topOrderHash != lastCompletedOrderHash)
             {
                 if(page == 1) { topOrderHashPageOne = topOrderHash;  }
 
-                console.log("new order");
+                //console.log("new order");
 
                 var foundLast = false;
 
@@ -65,7 +158,7 @@ if(localStorage.hasOwnProperty('tsn-completedHash')){
                 if (!foundLast) {
                     var item = $(this).find('a')[0];
                     var itemName = item.text;
-                    var itemId = item.href.match(/[^\/]+$/g);
+                    var itemId = item.href.match(/[^\/]+$/g)[0];
 
                     var itemBuyOrSell = $(this).find('td')[1].innerText.match(/([^\s]+)\sfor/)[1];
                     var itemPrice = parseInt($(this).find('td')[1].innerText.replace(/,/,'').match(/\d+/)[0]);
@@ -121,6 +214,7 @@ if(localStorage.hasOwnProperty('tsn-completedHash')){
             
 
         });
+        */
         }
         else {
             setTimeout(completedOrdersCheck, 200);
@@ -128,15 +222,15 @@ if(localStorage.hasOwnProperty('tsn-completedHash')){
     }
 }
 
-var buyAmount = 0;
-var sellAmount = 0;
+var buysAmount = 0;
+var sellsAmount = 0;
 var balanceAmt = 0;
 var balancePlusBuysAmt = 0;
 
 function openOrdersCheck() {
     clearInterval(openOrdersInterval);
     // https://mlb19.theshownation.com/community_market/orders/open
-    if ( typeof $ !== "undefined" && $('#helperStubsDiv2').length > 0) {
+    if ( typeof $ !== "undefined" ) {
         
         var url = 'https://mlb19.theshownation.com/community_market/orders/open';
         $.ajax({url:url}).done(function(b){
@@ -148,29 +242,34 @@ function openOrdersCheck() {
             b = $.parseHTML(b);
             var numBuys = $(b).find('.buy-orders-table tbody tr').length;
             var numSells = $(b).find('.sell-orders-table tbody tr').length;
-            buyAmount = 0;
-            sellAmount = 0;
+            buysAmount = 0;
+            sellsAmount = 0;
 
             if ( numBuys > 0 ) {
                 $(b).find('.buy-orders-table tbody tr td:nth-child(2)').each( function(i) {
                     
-                    buyAmount = buyAmount + parseInt($(this)[0].textContent.replace(/[^\d]/gi, ''));
+                    buysAmount = buysAmount + parseInt($(this)[0].textContent.replace(/[^\d]/gi, ''));
                 });
                 
             }
             if ( numSells > 0 ) {
                 $(b).find('.sell-orders-table tbody tr td:nth-child(2)').each( function(i) {
-                    sellAmount = sellAmount + parseInt($(this)[0].textContent.replace(/[^\d]/gi, ''));
+                    sellsAmount = sellsAmount + Math.floor(parseInt($(this)[0].textContent.replace(/[^\d]/gi, '')) * .9);
                 });
                 
             }
+            localStorage.setItem('tsn-numBuys',numBuys);
+            localStorage.setItem('tsn-numSells',numSells);
+            localStorage.setItem('tsn-buysAmount',buysAmount);
+            localStorage.setItem('tsn-sellsAmount',sellsAmount);
 
             completedOrdersCheck();
             initialStubsCheck();
 
-            chrome.runtime.sendMessage(extensionId, {"openBuys": numBuys, "openSells": numSells, "buyAmount": buyAmount, "sellAmount": sellAmount}, function(response) {
+            chrome.runtime.sendMessage(extensionId, {"numBuys": numBuys, "numSells": numSells, "buysAmount": buysAmount, "sellsAmount": sellsAmount}, function(response) {
                 console.log(response.msg);
              });
+             
         });
 
     }
@@ -183,7 +282,7 @@ var openOrdersInterval = setInterval(openOrdersCheck,20000);
 
 var doneInitial = false;
 function initialStubsCheck() {
-    if (typeof $ !== "undefined" && $('#helperStubsDiv').length > 0) {
+    if (typeof $ !== "undefined" ) {
         var url = 'https://mlb19.theshownation.com/dashboard';
         $.ajax({url:url}).done(function(b){
             b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
@@ -193,7 +292,9 @@ function initialStubsCheck() {
             // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/actionshots/3785374b5e5df43203dc02054105cf58.jpg','https://s3.amazonaws.com/mlb-theshownation/tsn18/3/img/shared/default-actionshot.jpg');
             b = $.parseHTML(b);
             balanceAmt = parseInt($(b).find('.currency-widget-amount')[0].textContent.replace(/[^\d]/gi,''));
-            balancePlusBuysAmt = balanceAmt + buyAmount;
+            balancePlusBuysAmt = balanceAmt + buysAmount;
+            localStorage.setItem('tsn-balanceAmt',balanceAmt);
+            localStorage.setItem('tsn-balancePlusBuysAmt',balancePlusBuysAmt);
             chrome.runtime.sendMessage(extensionId, {"balanceAmt": balanceAmt, "balancePlusBuysAmt": balancePlusBuysAmt}, function(response) {
                 console.log(response.msg);
              });
