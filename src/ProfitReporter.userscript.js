@@ -19,7 +19,8 @@ changelog["2019.4.8.1"] = ['Working on re-tooling toward using CM Helper logic -
 
 function waitForShowUpdates(){
 if ( typeof showUpdates !== "undefined" ) {
-showUpdates(currentVersion, changelog, 'ProfitReporter');
+//showUpdates(currentVersion, changelog, 'ProfitReporter');
+true;
 }
 else {
     setTimeout(waitForShowUpdates, 100);

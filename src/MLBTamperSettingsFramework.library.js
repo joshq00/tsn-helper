@@ -148,7 +148,7 @@ function tsnGo() {
 
           toggle(settingsDiv);
           hide(document.getElementById('tsn-settings-save-button0'));
-          hide(document.getElementById('tsn-settings-save-button1'));
+          
 
       //console.log();
       });
@@ -160,7 +160,7 @@ function tsnGo() {
     contentContainer.prepend(headerFragment);
 
     // Add settings icon to navigation
-    var menus = document.getElementsByClassName('menu-site');
+    var menus = document.getElementsByClassName('header-search');
     for (var menu = 0; menu < menus.length; menu++){
     //$(menus).each(function(menu){
         var buttonFragment = document.createDocumentFragment();
@@ -168,6 +168,7 @@ function tsnGo() {
         var a = document.createElement('a');
         a.href="#";
         var settingsButton = document.createElement('span');
+        settingsButton.setAttribute('title', 'MLBTSN Helper Settings')
         settingsButton.classList.add('settings-icon');
         settingsButton.classList.add('icon');
         // settingsButton.classList.add('button-small');
@@ -180,7 +181,7 @@ function tsnGo() {
           li.addEventListener('click', function(){
            toggle(document.getElementById('tm-settings'));
               
-              menuIsOne ? $('.site-offcanvas-controls-close')[0].click(): true;
+             
               document.getElementById('tm-settings').focus();
               toggle(document.getElementById(saveButtonId));
                 

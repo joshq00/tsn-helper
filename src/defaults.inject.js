@@ -26,6 +26,7 @@ function injectScript(file_path, tag='html', type='script', text='') {
 function injectCss() {
     if ( document.getElementsByTagName('head').length > 0 ) {
         injectScript(chrome.runtime.getURL('css/extraCss.css'), 'head', 'link');
+        injectScript(chrome.runtime.getURL('css/icons.css'), 'head', 'link');
     } else {
         setTimeout(injectCss, 200);
     }

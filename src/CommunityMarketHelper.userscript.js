@@ -1,55 +1,7 @@
 import md5 from './lib/md5.js'
 import settings from './lib/settings.js'
-import showUpdates from './lib/showUpdates.js'
 import cardData from './MLBTSNCardData.library.js'
 
-var currentVersion = "2019.4.15.3";
-
-var changelog = [];
-
-changelog["2019.4.22.1"] = ['Moved notifications to the Chrome browser. (Patrons Only)',
-                            'Notifications happen in the background, even if you are not on MLBTSN',
-                            'Settings to ignore columns for Community Market Helper (Patrons Only)',
-                            'Refresh button to manually refresh columns',
-                            'Temporary issue: the auto-reload item on buy/sell notification is not functioning now that the notification is in the browser. I am working on this.']
-
-changelog["2019.4.15.3"] = ['Some fixes for the notifications - last update before Chrome Extension',]
-
-changelog["2019.4.15.2"] = ['BIG updates!',
-                            'Order information in the navbar',
-                            'Notifications of completed orders - Patrons only ',
-                            'This may be the last that requires Tampermonkey - moving to Chrome extension for other cool features',
-                            ];
-
-changelog["2019.4.9.2"] = ['A lot of styling stuff - fixed headers on tables',
-                            'Moved buy/sell cancels into the buy/sell column',
-                            'Refresh icons to tell you when something is happening',
-                            'Only refresh the item you just bought/purchased. Wait for interval for everything else.'];
-
-changelog["2019.4.9.1"] = ['Include default settings on updates (sorry, upgraders!)'];
-
-changelog["2019.4.8.3"] = ['Switched minutes per sale to sales per hour - better for heatmap',
-                            'Added option for buy/sell factor and ROI on heatmap',
-                        'Styling fixes'];
-
-changelog["2019.4.8.2"] = ['Began adding image logos for equipment to make space',
-                          'Shortened series names for space'];
-
-changelog["2019.4.8.1"] = ['Added ROI (everyone)',
-                            'Average Buy/Sell/Profit, Buy/Sell Factor (Patrons)',
-                            'Improved ReCaptcha solution - zoom helper frame (Everyone)',
-                            'Started work toward unifying into one script']
-
-changelog["2019.4.5.2"] = ['Recaptcha detection magic. Turn off the "show helper iframe" setting to see it in action'];
-
-changelog["2019.4.5.1"] = ['Added new heatmap features for patrons - be sure to check settings and save!',
-                       'Added patreon button to bottom of page for those who are interested in supporting development',
-                       'Adjusted table displays to make room for more data',
-                       'Started work on Recaptcha warnings to avoid problems',
-                       'Added stubs balance to the header - where it should be...',
-                       'Various style enhancements'];
-
-showUpdates(currentVersion, changelog, 'CommunityMarketHelper');
 
 function pickHex(weight, temp="hot") {
     var color1, color2;
@@ -199,11 +151,13 @@ var dataPoints = {
     'avgRoi': {'title': "Average buy order price", 'heading': 'μ<sub>ROI</sub>', 'class': 'short', 'patronsOnly': true},
     'perExchange': {'title': "Exchange Point per Stub", 'heading': 'XCH', 'class': 'short', 'patronsOnly': true},
     'openOrders': {'title': "Open Orders", 'heading': 'OPEN', 'class': 'short', 'patronsOnly': false},
+    'maxGap': {'title': "Max Gap", 'heading': '^GAP', 'class': 'short', 'patronsOnly': false},
 
 }
 
 
 function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
+    var itemType = document.querySelector('.items-results-table thead th:nth-child(3)').textContent.toLowerCase();
    // console.log("Debug1");
     
    // console.log("Debug2");
@@ -222,7 +176,7 @@ function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
         cardSelector = $(tables).find('td:nth-child(3) a[data-openorders="true"]');
     }
     else if (specificTarget != ''){
-        console.log("Specific Target", specificTarget);
+        // console.log("Specific Target", specificTarget);
         cardSelector = $(tables).find('td:nth-child(3) a[href="'+specificTarget+'"]');
 
     } else { 
@@ -469,12 +423,12 @@ function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
 
                 var brandTd = $(this).parent().parent().find('td:nth-last-child(2)');
                 $(brandTd).attr("data-sort", brandTd[0].textContent);
-                brandTd[0].innerHTML = replaceBulk(brandTd[0].innerHTML, findReplaceSeries);
-                brandTd[0].innerHTML = replaceBulk(brandTd[0].innerHTML, findReplaceBrands);
-
-                
-            
-
+                if(itemType === 'player') {
+                    brandTd[0].innerHTML = replaceBulk(brandTd[0].innerHTML, findReplaceSeries);
+                }
+                else if (itemType === 'equipment') {
+                    brandTd[0].innerHTML = replaceBulk(brandTd[0].innerHTML, findReplaceBrands);
+                }
                 
 
                 //$(theForm).css('width','50%');
@@ -514,10 +468,9 @@ function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
     });
 }
 
+function headerFixer() {
+    var itemType = document.querySelector('.items-results-table thead th:nth-child(3)').textContent.toLowerCase();
 
-function orderHelper(){
-    //$('.helperDiv').remove();
-    //toastr.clear();
     var table_headers = $('.items-results-table thead')[0];
     $(table_headers).find('th:nth-child(1)')[0].classList.add("short");
     $(table_headers).find('th:nth-child(2)')[0].classList.add("short");
@@ -531,8 +484,10 @@ function orderHelper(){
 
     $(table_headers).find('th:nth-child(6)')[0].innerHTML = "BUY";
     $(table_headers).find('th:nth-child(6)')[0].classList.add("long");
-    $(table_headers).find('th:nth-child(7)')[0].innerHTML = "";
-    $(table_headers).find('th:nth-child(8)')[0].innerHTML = "";
+    if(itemType === 'player' || itemType === 'equipment' ) {
+        $(table_headers).find('th:nth-child(7)')[0].innerHTML = "";
+        $(table_headers).find('th:nth-child(8)')[0].innerHTML = "";
+    }
 
     $(table_headers).find('th:nth-child(1)').attr("data-sort-default", true);
     
@@ -555,6 +510,14 @@ function orderHelper(){
 
     
     $(document).tooltip();
+}
+
+function orderHelper(onePage = false){
+    //$('.helperDiv').remove();
+    //toastr.clear();
+
+    headerFixer();
+    
 
     tables = $('.items-results-table tbody')[0];
     if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
@@ -577,8 +540,10 @@ function orderHelper(){
     //tables.style.display = 'flex';
     //tables.style.flexDirection = 'column';
     var numPages = 1;
+    if(!onePage) {
         try {numPages = parseInt($('.pagination').find('a')[$('.pagination').find('a').length-2].innerText);}
         catch(error) { true; }
+    }
        // console.log(numPages);
     if(numPages > 10){
     numPages = 10;
@@ -667,6 +632,54 @@ function go() {
 
     //favoritesTimeout = setTimeout(orderHelper,60000);
 
+    var playerIcon = document.createElement('a');
+    playerIcon.classList.add('player-icon', 'cm-icon');
+    playerIcon.setAttribute('title', 'MLB Players');
+    playerIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=0';
+    var equipmentIcon = document.createElement('a');
+    equipmentIcon.classList.add('equipment-icon', 'cm-icon');
+    equipmentIcon.setAttribute('title', 'Equipment');
+    equipmentIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=2';
+    var stadiumIcon = document.createElement('a');
+    stadiumIcon.classList.add('stadium-icon', 'cm-icon');
+    stadiumIcon.setAttribute('title', 'Stadiums');
+    stadiumIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=1';
+    var sponsorshipIcon = document.createElement('a');
+    sponsorshipIcon.classList.add('sponsorship-icon', 'cm-icon');
+    sponsorshipIcon.setAttribute('title', 'Sponsorships');
+    sponsorshipIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=3';
+    var unlockableIcon = document.createElement('a');
+    unlockableIcon.classList.add('unlockable-icon', 'cm-icon');
+    unlockableIcon.setAttribute('title', 'Unlockables');
+    unlockableIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=7';
+    document.querySelector('.layout-heading').append(playerIcon, equipmentIcon, stadiumIcon, sponsorshipIcon, unlockableIcon);
+
+    fetch('https://mlb19.theshownation.com/community_market/shortcuts').then( function(response) {
+        if (response.ok) {
+            return response.text()
+          } else {
+            var error = new Error(response.statusText)
+            error.response = response
+            throw error
+          }
+    } ).then( function (text) {
+        text = text.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
+        text = text.replace(/<script>[^<]+<\/script>/gi, "");
+        text = text.replace(/<link[^>]+>/gi, "");
+        var frag = document.createRange().createContextualFragment(text);
+        var allShortcuts = frag.querySelectorAll('.saved-search-title');
+        allShortcuts.forEach(function(v,i) {
+            var title = v.textContent;
+            var link = v.href;
+            var newLink = document.createElement('a');
+            newLink.classList.add('cm-link');
+            newLink.href = link;
+            newLink.textContent = title;
+            document.querySelector('.layout-heading').append(newLink);
+        });
+    }).catch( function(e) {
+        console.log(e);
+    });
 
 
     helperFrame = document.createElement('iframe');
@@ -696,6 +709,9 @@ function go() {
 
     if(location.search.match(/[^\/]+$/g) != null){
     orderHelper();
+    }
+    else {
+    orderHelper(true);
     }
 
     window.addEventListener('message', receiver, false);
@@ -728,7 +744,7 @@ function go() {
                 $(card.sellForm).css('display','flex');
                 card.sellForm.target = "helperFrame";
 
-                toastr.info(`${e.data.itemName} ${e.data.itemBuyOrSell} for ${e.data.itemPrice} ${card.buyForm.outerHTML.replace(/data-value/g,'value')} ${card.sellForm.outerHTML.replace(/data-value/g,'value')}`);
+                toastr.info(`${card.buyForm.outerHTML.replace(/data-value/g,'value')} ${card.sellForm.outerHTML.replace(/data-value/g,'value')}`, `${e.data.itemName} ${e.data.itemBuyOrSell} for ${e.data.itemPrice}`);
             }).catch(function(e) { console.log(e)});
 
               

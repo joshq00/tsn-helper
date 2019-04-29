@@ -375,7 +375,11 @@ function cardData(b, doc=false, id=''){
     var sellNows = [];
     var buyNows = [];
     var buyOrSales = [];
+    var lastValue = sales[0];
+    var maxGap = 0;
     sales.forEach(function(v, i){
+        var diff = Math.abs(v-lastValue);
+        if ( diff > maxGap ) { maxGap = diff };
      if (v > middle){
          buyNows.push(v);
          buyOrSales[i] = 'buy';
@@ -384,6 +388,7 @@ function cardData(b, doc=false, id=''){
             sellNows.push(v);
             buyOrSales[i] = 'sale';
         }
+        lastValue = v;
     });
     var filteredBuyNows = [];
     var filteredSellNows = [];
@@ -542,6 +547,7 @@ function cardData(b, doc=false, id=''){
         'buyTrend': buyTrend,
         'sellTrend': sellTrend,
         'profitGap': profitGap,
+        'maxGap': maxGap,
         'ppm': ppm,
         'cancelButtons': cancelBuyButtons + cancelSellButtons,
         'cancelBuyButtons': cancelBuyButtons,
@@ -549,6 +555,7 @@ function cardData(b, doc=false, id=''){
         'numBuys': numBuys,
         'numSells': numSells,
         'openOrders': numBuys + numSells,
+        'outbid': outbidBuy || outbidSell,
         'winningBuy': winningBuy,
         'winningSell': winningSell,
         'balance': balance,

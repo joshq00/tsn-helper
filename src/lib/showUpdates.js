@@ -13,7 +13,7 @@ export default function showUpdates(currentVersion, changelog, scriptName) {
             updateDialog.title = "MLBTSN Helper Update - "+scriptName+" "+currentVersion;
             var updateInnerHTML = '';
 
-            for (checkVersion in changelog) {
+            for (var checkVersion in changelog) {
             
                 if( version_gt(checkVersion, updateMessageSeen ) )
                 {
