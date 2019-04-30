@@ -30,12 +30,13 @@ function updateHeaders() {
 
         document.getElementById('helperStubsDiv').innerHTML = '<span><img class="inline-icon-sm" src="https://s3.amazonaws.com/the-show-websites/mlb19_portal/5/img/shared/stubs.png">'+balanceAmt.toLocaleString()+'</span>';
         document.getElementById('helperStubsSubDiv').innerHTML = '<small style="font-style:italic; color:#a55a5a">'+balancePlusBuysAmt.toLocaleString()+"</small>";
-        document.getElementById('helperStubsDiv2').innerHTML = `<small style="display:flex; flex-direction:column">${numBuys} open buys @ ${buysAmount}</small><small style="display:flex; flex-direction:column">${numSells} open sells @ ${sellsAmount}</small>`;
+        document.getElementById('helperStubsDiv2').innerHTML = `<small style="display:flex; flex-direction:column">${numBuys} open buy` + ( numBuys > 1 ? 's' : '' ) + ( numBuys > 0 ?  ` @ ${buysAmount}` : `s` ) + `</small><small style="display:flex; flex-direction:column">${numSells} open sell` + ( numSells > 1 ? 's' : '' ) + ( numSells > 0 ?  ` @ ${sellsAmount}` : `s` ) + `</small>`;
     updateHeaderInterval = setInterval(updateHeaders, 10000);
     }
     else if ( document.getElementsByClassName('header-logo').length > 0 ) {
         var logo = document.getElementsByClassName('header-logo')[0];
         logo.style.display = 'flex';
+        logo.style.alignItems = 'center';
         var outerStubsDiv = document.createElement('div');
         outerStubsDiv.style.color = 'white';
         outerStubsDiv.style.display = 'inline-block';

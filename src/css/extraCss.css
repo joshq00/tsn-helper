@@ -200,7 +200,7 @@ button.remove{
     box-sizing: content-box
 }
 
-.settings-icon:before {
+span.settings-icon:before {
    content: '\e041';
 }
 
@@ -369,6 +369,11 @@ table.items-results-table td a {
     margin: 0 !important;
 }
 
+.header-search {
+    display: flex !important;
+    
+}
+
 .header-search li a {
     color: white;
 }
@@ -379,4 +384,8 @@ table.items-results-table td a {
 
 .layout-main.title-layout-split-main {
     padding: 3px;
+}
+
+.menu-list.collapse.horizontal {
+    float: right;
 }

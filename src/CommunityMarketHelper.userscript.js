@@ -692,6 +692,10 @@ function go() {
     helperFrame.style.position = 'fixed';
     helperFrame.style.bottom = '1px';
 
+    try { document.querySelector('.title-layout-heading').style.display = 'none'; } catch {  }
+    try { document.querySelector('.widget-notice').style.display = 'none'; } catch {  }
+    try { document.querySelector('h3').style.display = 'none'; } catch { }
+
 
     helperFrame.name = 'helperFrame';
     // helperFrame.sandbox = 'allow-same-origin';
@@ -737,14 +741,51 @@ function go() {
                 var card = cardData(text, false, e.data.itemId);
                 $(card.buyForm).css('display','flex');
                 card.buyForm.target = "helperFrame";
-
-
-                //$(this).parent().append(card.sellForm);
-                //$(theForm).css('width','50%');
                 $(card.sellForm).css('display','flex');
                 card.sellForm.target = "helperFrame";
 
-                toastr.info(`${card.buyForm.outerHTML.replace(/data-value/g,'value')} ${card.sellForm.outerHTML.replace(/data-value/g,'value')}`, `${e.data.itemName} ${e.data.itemBuyOrSell} for ${e.data.itemPrice}`);
+                var bgSpan = document.createElement('span');
+                bgSpan.style.backgroundColor='#fff';
+                var span = document.createElement('span');
+                span.style.color='#000';
+                var bgcolor = '';
+                if (card[settings.heatFactor] < 0 ) {
+                    bgcolor = 'rgba(0,0,255,0.45)';
+                }
+                else if( card[settings.heatFactor] > settings.hotness ){
+                   bgcolor = 'rgba(255,0,0,0.45)';
+               }
+               else if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
+                     md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
+                   var bgcolor = '';
+   
+               if ( settings.hotness >= card[settings.heatFactor] && card[settings.heatFactor] > settings.warmness ) {
+                   bgcolor = 'rgba('+pickHex(parseFloat( ( ( card[settings.heatFactor] - settings.coolness) / ( settings.hotness - settings.coolness ) ).toFixed(2) ), "hot" ).join()+')';
+               }
+               else if ( settings.warmness >= card[settings.heatFactor] && card[settings.heatFactor] > settings.coolness ) {
+                   bgcolor = 'rgba('+pickHex(parseFloat( ( ( card[settings.heatFactor] - settings.coolness) / ( settings.warmness - settings.coolness ) ).toFixed(2) ), "warm" ).join()+')';
+               }
+                   else {
+                       bgcolor = 'rgba('+pickHex(parseFloat( ( card[settings.heatFactor] / settings.coolness ).toFixed(2) ) , "cool" ).join()+')';
+                   }
+   
+   
+               }
+               
+                //$(this).parent().append(card.sellForm);
+                //$(theForm).css('width','50%');
+                
+                var cardInfo = document.createElement('span');
+                cardInfo.innerHTML = `${card.profitMargin}<small>±</small> | ${card.roi}<small>ROI</small> | ${card.ppm}<small>PPM</small> | ${card.salesPerHour}<small>S/H</small>`;
+                cardInfo.style.backgroundColor = bgcolor;
+                span.append(card.buyForm);
+                if(card.sellable > 0) {
+                    span.append(card.sellForm);
+                }
+                bgSpan.append(cardInfo);
+                span.append(bgSpan);
+                
+                toastr.info(`${span.outerHTML.replace(/data-value/g,'value')}`, `${e.data.itemName} ${e.data.itemBuyOrSell} for ${e.data.itemPrice}`);
             }).catch(function(e) { console.log(e)});
 
               

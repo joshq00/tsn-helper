@@ -167,9 +167,10 @@ function tsnGo() {
         var li = document.createElement('li');
         var a = document.createElement('a');
         a.href="#";
+        a.classList.add('header-icon', 'white-icon', 'settings-icon');
         var settingsButton = document.createElement('span');
-        settingsButton.setAttribute('title', 'MLBTSN Helper Settings')
-        settingsButton.classList.add('settings-icon');
+        a.setAttribute('title', 'MLBTSN Helper Settings')
+        //settingsButton.classList.add('settings-icon');
         settingsButton.classList.add('icon');
         // settingsButton.classList.add('button-small');
           settingsButton.id = 'tm-settings-button'+menu;
