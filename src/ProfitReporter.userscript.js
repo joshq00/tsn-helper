@@ -199,8 +199,8 @@ function moveBuyForm() {
     buysDiv.innerHTML = "<h3 style='color:white; margin-right: 12px;'>BUY</h3>";
     
     buysDiv.append(card.buyForm);
-	page.getElementsByClassName("title-layout-main")[0].prepend(buysDiv);
-    $(card.buyForm).find('button')[0].innerHTML = "Create Buy Order";
+	page.getElementsByClassName("section-items-primary")[0].append(buysDiv);
+    $(card.buyForm).find('button')[0].innerHTML = "+BUY";
     card.buyFormButton = $(card.buyForm).find('button')[0];
     for (var cancelButton of card.cancelBuyButtons) {
         buysDiv.append(cancelButton);
@@ -217,9 +217,11 @@ function moveSellForm(sellable=0) {
     sellsDiv.innerHTML = `<h3 style='color:white; margin-right: 12px;'>SELL (${card.sellable})</h3>`;
     
     if(sellable > 0) { sellsDiv.append(card.sellForm); }
-	page.getElementsByClassName("title-layout-main")[0].prepend(sellsDiv);
-    $(card.sellForm).find('button')[0].innerHTML = "Create Sell Order";
-    card.sellFormButton = $(card.sellForm).find('button')[0];
+	page.getElementsByClassName("section-items-primary")[0].append(sellsDiv);
+    try { $(card.sellForm).find('button')[0].innerHTML = "+SELL";  
+            card.sellFormButton = $(card.sellForm).find('button')[0];
+    } catch (e) { console.log(e); }
+    
     for (var cancelButton of card.cancelSellButtons) {
        sellsDiv.append(cancelButton);
        if ($(cancelButton).find('button')[0].style.backgroundColor == "red") {
@@ -316,7 +318,7 @@ updateChart();
 
     
 
-    var mainHeading = document.querySelector(".title-widget-main");
+    var mainHeading = document.querySelector(".section-items-primary");
     
     //$('.marketplace-main-heading').append(li);
     // $(li).css('display','flex');
@@ -395,8 +397,9 @@ updateChart();
 
    cardDataDiv.innerHTML = '<div class="player-attr-row">'+cardDataRows+'</div>';
 
-
-page.getElementsByClassName("section-items-secondary")[0].children[2].prepend(cardDataDiv);
+   
+    page.getElementsByClassName("section-items-secondary")[0].prepend(cardDataDiv);
+    page.getElementsByClassName("section-items-secondary")[0].prepend(page.getElementsByClassName("section-items-secondary")[0].children[1]);
 
     moveBuyForm();
     
@@ -405,7 +408,7 @@ page.getElementsByClassName("section-items-secondary")[0].children[2].prepend(ca
 
     // for ( var table of Array.from(document.querySelectorAll(".title-widget-main table")).slice(0,-2) ) { mainHeading.prepend(table); table.style.backgroundColor = "white"; table.style.color = "black"; }
 
-    mainHeading.prepend(document.querySelector(".currency-widget-inner"));
+    // mainHeading.prepend(document.querySelector(".currency-widget-inner"));
 
     var buyOrdersTitle = document.evaluate("//th[contains(.,'Order Date')]/following-sibling::th[contains(.,'Buy Order Price')]", document).iterateNext()
     if (buyOrdersTitle != null) { var buyEl = document.createElement("small");

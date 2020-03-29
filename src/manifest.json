@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "MLB The Show Nation: Helper Extension 2020",
     "description": "Helper extension to make MLB The Show Nation website more usable",
-    "version": "2020.3.28.1",
+    "version": "2020.3.29.1",
     "permissions": [
         "background",
         "contextMenus",
@@ -68,7 +68,8 @@
       },
       {
         "matches": [
-            "https://theshownation.com/mlb20/community_market*"
+            "https://theshownation.com/mlb20/community_market*",
+            "https://theshownation.com/mlb20/watch_list*"
           ],
         "exclude_globs": [
           "https://theshownation.com/mlb20/listings/*",

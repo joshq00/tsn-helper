@@ -61,6 +61,10 @@ function doc_keyUp(e) {
     }
     checkLogin();
 
+
+
+
+
 })();
 
 function disableConfirmations() {
@@ -72,6 +76,23 @@ function disableConfirmations() {
     }
 }
 disableConfirmations();
+
+// Disable turbolinks bullshit
+function disableTurbolinks() {
+    var links = document.getElementsByTagName('a');
+    if (links.length > 10 ) {
+    
+    /*console.log(links);
+    for (var e of links){
+        e.dataset.turbolinks = 'false';
+        }*/
+        document.getElementsByTagName('body')[0].dataset.turbolinks = 'false';
+    }
+    else {
+        setTimeout(disableTurbolinks, 200);
+    }
+}
+disableTurbolinks();
 
 function makeIcon(title,href) {
     var iconLi = document.createElement('li');
@@ -122,5 +143,3 @@ function iconizeMenu() {
     }
 }
 iconizeMenu();
-
-

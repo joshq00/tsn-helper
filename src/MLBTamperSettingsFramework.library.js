@@ -155,9 +155,22 @@ function tsnGo() {
       //settingsDiv.appendChild(settingsForm);
       headerFragment.appendChild(settingsDiv);
 
+    var contentContainer
 
-    var contentContainer = document.getElementsByClassName("page-wrap")[0];
-    contentContainer.prepend(headerFragment);
+    try {
+        contentContainer = document.getElementsByClassName("page-wrap")[0];
+    } catch(e) {
+        contentContainer = document.getElementsByClassName("page-body-items-inner")[0];
+    }
+    console.log(contentContainer)
+    
+    try {
+        contentContainer.prepend(headerFragment);
+    } catch (e) {
+        console.log("Settings framework error");
+        contentContainer = document.querySelector("body");
+        contentContainer.prepend(headerFragment);
+    }
 
     // Add settings icon to navigation
     var menus = document.querySelectorAll('.global-menu .global-menu-links');

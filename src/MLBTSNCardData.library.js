@@ -174,7 +174,7 @@ var quickSellValues = {
 };
 var localDataBuys = {};
 var doOnce = false;
-function cardData(b, doc=false, id=''){
+function cardData(b, doc=false, id='') {
     var lastBuyAmt = 0;
     var lastBuyDate = null;
     var myProfit = null;
@@ -208,7 +208,8 @@ function cardData(b, doc=false, id=''){
     else
     {
    // console.log(b);
-    var name = $($(b).find('h1')[0]).contents().slice(-1)[0].textContent;
+   var name = "" 
+   try { name = $($(b).find('h1')[0]).contents().slice(-1)[0].textContent;} catch (e) { console.log(e);}
     // var name = $($(b).find('.marketplace-main-heading .name')[0]).text();
     if (name==""){
         name = $($(b).find('h2')[0]).text();
@@ -218,18 +219,26 @@ function cardData(b, doc=false, id=''){
 
     var rating = $($(b).find('.mlb20-card-rarity')[0]).text();
     var buyForm = $(b).find('#create-buy-order-form')[0];
-    $(buyForm).html($(buyForm).html().replace('Price',''))
-    var buyInput = buyForm.querySelector('#price');
-    var buyButton = buyForm.querySelector('button');
-    buyInput.setAttribute('placeholder', '');
+    try { $(buyForm).html($(buyForm).html().replace('Price','')) } catch (e) { console.log(e); }
+    try { var buyInput = buyForm.querySelector('#price'); } catch (e) { console.log(e); }
+    try { var buyButton = buyForm.querySelector('button');  } catch (e) { console.log(e); }
+    try { buyInput.setAttribute('placeholder', '');  } catch (e) { console.log(e); }
+    
+    
     var sellForm = $(b).find('#create-sell-order-form')[0];
-    $(sellForm).find('.seller-tax').remove();
-    $(sellForm).html($(sellForm).html().replace('Price',''))
-    var sellInput = sellForm.querySelector('#price');
-    sellInput.setAttribute('placeholder', '');
-    var sellButton = sellForm.querySelector('button');
-    var buyNowForm = $(b).find('.marketplace-card-order-now form')[0];
-    var sellNowForm = $(b).find('.marketplace-card-order-now form')[1];
+    try { 
+       $(sellForm).find('.seller-tax')[0].innerHTML = "<div id=\"taxed-price\" style=\"display:none;\">0</div>";
+
+    } catch(e) { console.log(e); };
+    try { $(sellForm).html($(sellForm).html().replace('Price','')) } catch(e) { console.log(e); }
+    try { 
+        var sellInput = sellForm.querySelector('#price');
+        sellInput.setAttribute('placeholder', '');
+        var sellButton = sellForm.querySelector('button');
+    }  catch(e) { console.log(e); }
+    
+    var buyNowForm = $(b).find('.market-forms-quick form')[0];
+    var sellNowForm = $(b).find('.market-forms-quick form')[1];
 
 
 
@@ -238,22 +247,30 @@ function cardData(b, doc=false, id=''){
     catch(error){ teamLogo = 'https://s3.amazonaws.com/mlb-theshownation/tsn18/8/img/shared/mlb19-pre-order-small.png'; console.log(error);}
     var cardClass = '';
     var shield = '';
-    if ($(b).find('.common').length > 0 || $(b).find('.card-bg-common').length > 0 ){  cardClass = 'common';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-common.png';}
-    else if ($(b).find('.bronze').length > 0 || $(b).find('.card-bg-bronze').length > 0 ){  cardClass = 'bronze';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-bronze.png'; }
-    else if ($(b).find('.silver').length > 0 || $(b).find('.card-bg-silver').length > 0 ){  cardClass = 'silver';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-silver.png'; }
-    else if ($(b).find('.gold').length > 0 || $(b).find('.card-bg-gold').length > 0 ){  cardClass = 'gold';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-gold.png'; }
-    else if ($(b).find('.diamond').length > 0 || $(b).find('.card-bg-diamond').length > 0 ){  cardClass = 'diamond';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-diamond.png';}
+    if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('common')){  cardClass = 'common';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-common.png';}
+    else if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('bronze')){  cardClass = 'bronze';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-bronze.png'; }
+    else if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('silver')){  cardClass = 'silver';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-silver.png'; }
+    else if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('gold')){  cardClass = 'gold';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-gold.png'; }
+    else if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('diamond')){  cardClass = 'diamond';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-diamond.png';}
 
-    var cardImage = $(b).find('.mlb20-card-actionshot')[0].getAttribute('src');
-    var cardType = 'player';
+
+
+    try { 
+        var cardImage = $(b).find('.section-items-primary div img')[0].getAttribute('src'); 
+        } catch (e) {
+            console.log(e)
+        }
+    var cardType = '';
     var quickSellValue = 0;
     var exchangeValue = 0;
 
-    if ($(b).find('.card-asset-mlb-card').length > 0){  cardType = 'player';  exchangeValue = exchangeValues['player'][rating]; }
-    else if ($(b).find('.card-asset-equipment').length > 0){  cardType = 'equipment';  }
-    else if ($(b).find('.card-asset-stadium').length > 0){  cardType = 'stadium';  }
-    else if ($(b).find('.card-asset-sponsorship').length > 0){  cardType = 'sponsorship';  }
-    else if ($(b).find('.card-asset-unlockable').length > 0){  cardType = 'unlockable';  }
+    if ($(b).find('.mlb20-card-actionshot-wrapper').length > 0){  cardType = 'player';  exchangeValue = exchangeValues['player'][rating]; }
+    else if ($(b).find('.mlb20-card-equipment-wrapper').length > 0){  cardType = 'equipment';  }
+    else if ($(b).find('.mlb20-card-stadium-wrapper').length > 0){  cardType = 'stadium';  }
+    else if ($(b).find('.mlb20-card-sponsorship-wrapper').length > 0){  cardType = 'sponsorship';  }
+    else if ($(b).find('.mlb20-card-unlockable-wrapper').length > 0){  cardType = 'unlockable';  }
+
+    console.log(cardType);
 
     try{ quickSellValue = quickSellValues[cardType][cardClass];}
     catch(error){ console.log(error)
@@ -317,9 +334,13 @@ function cardData(b, doc=false, id=''){
             );
         }
 
-        var balance = $(b).find('.stubs')[0];
-        var balanceAmt = parseInt(balance.textContent.replace(/[^\d]/gi, ''));
-        var balanceStr = '<span><img class="inline-icon-sm" src="https://s3.amazonaws.com/the-show-websites/mlb19_portal/5/img/shared/stubs.png">'+balanceAmt.toLocaleString()+"</span>";
+        try {
+            var balance = $(b).find('.stubs')[0];
+            var balanceAmt = parseInt(balance.textContent.replace(/[^\d]/gi, ''));
+            var balanceStr = '<span><img class="inline-icon-sm" src="https://s3.amazonaws.com/the-show-websites/mlb19_portal/5/img/shared/stubs.png">'+balanceAmt.toLocaleString()+"</span>";
+        } catch (e) {
+            console.log(e);
+        }
 
     var sellOrdersHeader = $(b).find("th:contains('Order Date') ~ th:contains('Sell Order Price')")[0];
     var sellOrdersTable = null;
@@ -446,22 +467,22 @@ function cardData(b, doc=false, id=''){
 
     for( var iii=0,lll=dates.length;iii<lll;iii++ ){
         //console.log(dates[iii]);
-    if(dates[iii].isAfter(OneHourAgo))
-    {
-        numHour++;
-        thisHourDates.push(dates[iii]);
+        if(dates[iii].isAfter(OneHourAgo))
+        {
+            numHour++;
+            thisHourDates.push(dates[iii]);
 
-    }
-    if(dates[iii].isAfter(ThreeHoursAgo))
-    {
-        numThreeHours++;
+        }
+        if(dates[iii].isAfter(ThreeHoursAgo))
+        {
+            numThreeHours++;
 
-    }
-    if(dates[iii].isSame(moment(), 'day'))
-    {
-        numToday++;
+        }
+        if(dates[iii].isSame(moment(), 'day'))
+        {
+            numToday++;
 
-    }
+        }
     }
     if (numToday == 200){
         var timeToday = now.diff(today,'minutes');
@@ -475,8 +496,8 @@ function cardData(b, doc=false, id=''){
 
 
     if(!doOnce){
-    doOnce = true;
-    //console.log(thisHourDates);
+        doOnce = true;
+        //console.log(thisHourDates);
 
     }
 
@@ -501,18 +522,30 @@ function cardData(b, doc=false, id=''){
 
     var perExchange = Math.round ( (exchangeValue / (sellNow + 1) * 100) ) / 100 ;
 
-    sellInput.value = winningSell ? parseInt(buyNow).toLocaleString() : parseInt(buyNow - 1).toLocaleString();
+    try {
+        sellInput.value = winningSell ? parseInt(buyNow).toLocaleString() : parseInt(buyNow - 1).toLocaleString();
+    } catch (e) { console.log(e); }
+    
     buyInput.value = winningBuy ? parseInt(sellNow).toLocaleString() : parseInt(sellNow + 1).toLocaleString();
-    sellInput.setAttribute('data-value', sellInput.value);
-    buyInput.setAttribute('data-value', buyInput.value);
-    sellInput.style.padding = "0px !important"
-    buyInput.style.padding = "0px !important"
-    buyButton.innerHTML = "+BUY";
-    buyButton.style.padding = "1px !important";
-    buyButton.style.height = "100%"
-    sellButton.innerHTML = "+SELL";
-    sellButton.style.padding = "1px !important";
-    sellButton.style.height = "100%"
+
+    try { 
+        sellInput.setAttribute('data-value', sellInput.value);
+        sellInput.style.padding = "0px !important";
+        sellButton.innerHTML = "+SELL";
+        sellButton.style.padding = "1px !important";
+        sellButton.style.height = "100%"
+
+    } catch (e) { console.log(e); }
+    try { 
+        buyInput.setAttribute('data-value', buyInput.value);
+            buyInput.style.padding = "0px !important"
+            buyButton.innerHTML = "+BUY";
+            buyButton.style.padding = "1px !important";
+            buyButton.style.height = "100%"
+        }  catch (e) { console.log(e);}
+    
+    
+    
 
     return {
         'name': name,
