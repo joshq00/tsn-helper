@@ -261,7 +261,7 @@ function go() {
         if(e.data.hasOwnProperty('itemName'))
          {
             if(settings.webNotifications) {
-                var url = `https://mlb19.theshownation.com/community_market/listings/${e.data.itemId}`
+                var url = `https://theshownation.com/mlb20/items/${e.data.itemId}`
                 fetch(url).
                 then( function(response) {
                 if (response.ok) {
@@ -294,7 +294,7 @@ function go() {
                 }
                
              // <a href="/community_market/listings/58972dceed371780056fb58a04f7ce7e" target="blank">Rival</a>
-             openOrderHelper(`https://mlb19.theshownation.com/community_market/listings/${e.data.itemId}`);
+             openOrderHelper(`https://theshownation.com/mlb20/items/${e.data.itemId}`);
              // console.log(e.data)
          }
         

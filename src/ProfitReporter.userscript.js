@@ -396,7 +396,7 @@ updateChart();
    cardDataDiv.innerHTML = '<div class="player-attr-row">'+cardDataRows+'</div>';
 
 
-page.getElementsByClassName("title-layout-main")[0].prepend(cardDataDiv);
+page.getElementsByClassName("section-items-secondary")[0].children[2].prepend(cardDataDiv);
 
     moveBuyForm();
     

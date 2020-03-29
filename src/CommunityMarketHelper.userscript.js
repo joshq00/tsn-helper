@@ -157,7 +157,7 @@ var dataPoints = {
 
 
 function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
-    var itemType = document.querySelector('.items-results-table thead th:nth-child(3)').textContent.toLowerCase();
+    var itemType = document.querySelector('table thead th:nth-child(3)').textContent.toLowerCase();
    // console.log("Debug1");
     
    // console.log("Debug2");
@@ -323,7 +323,7 @@ function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
                 sellButton.style.padding = "1px";
                 sellButton.style.height = "100%"
                 var sellInput = $(card.sellForm).find("input#price")[0];
-                sellInput.style.padding = "0px";
+                sellInput.setAttribute('style', "padding: 0px !important; font-size:8pt;");
                 }
                 for ( var cancelButton of card.cancelSellButtons ) {
                     $(buyTd).append(cancelButton);
@@ -346,7 +346,7 @@ function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
                 buyButton.style.padding = "1px";
                 buyButton.style.height = "100%"
                 var buyInput = $(card.buyForm).find("input#price")[0];
-                buyInput.style.padding = "0px";
+                buyInput.setAttribute('style', "padding: 0px !important; font-size:8pt;");
                 for ( var cancelButton of card.cancelBuyButtons ) {
                     $(sellTd).append(cancelButton);
                     cancelButton.target = "helperFrame";
@@ -469,9 +469,9 @@ function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
 }
 
 function headerFixer() {
-    var itemType = document.querySelector('.items-results-table thead th:nth-child(3)').textContent.toLowerCase();
+    var itemType = document.querySelector('table thead th:nth-child(3)').textContent.toLowerCase();
 
-    var table_headers = $('.items-results-table thead')[0];
+    var table_headers = $('table thead')[0];
     $(table_headers).find('th:nth-child(1)')[0].classList.add("short");
     $(table_headers).find('th:nth-child(2)')[0].classList.add("short");
     $(table_headers).find('th:nth-child(3)')[0].classList.add("long");
@@ -519,7 +519,7 @@ function orderHelper(onePage = false){
     headerFixer();
     
 
-    tables = $('.items-results-table tbody')[0];
+    tables = $('table tbody').last()[0];
     if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                   md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
         $(tables).find('tr td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).filter((x) => (!settings.hiddenColumns.includes(x))).length));
@@ -582,7 +582,7 @@ function orderHelper(onePage = false){
             }
             doneNum = doneNum + 1;
             if(doneNum == numPages){
-                sort = new Tablesort(document.getElementsByClassName('items-results-table')[0], { descending: true });
+                sort = new Tablesort(document.getElementsByTagName('table')[0], { descending: true });
                 marketHelper()
             }
 
@@ -591,7 +591,7 @@ function orderHelper(onePage = false){
     }
     else
     {
-               sort = new Tablesort(document.getElementsByClassName('items-results-table')[0], { descending: true });
+               sort = new Tablesort(document.getElementsByTagName('table')[0], { descending: true });
                marketHelper();
     }
 
@@ -624,7 +624,7 @@ function setRefresh(interval=undefined, setWhich='favorites') {
 
 function go() {
     'use strict';
-    if( typeof $ !== 'undefined'  && $('.items-results-table thead').length > 0){
+    if( typeof $ !== 'undefined'  && $('table thead').length > 0){
 
     //$('.marketplace-main-heading').children()[0].append(" ("+$('.order').length+")");
     //$('.marketplace-main-heading').append('<div style="float:right">Refresh interval: <input id="refresh-interval" size="5" value=".5"></input></div>');
@@ -635,26 +635,26 @@ function go() {
     var playerIcon = document.createElement('a');
     playerIcon.classList.add('player-icon', 'cm-icon');
     playerIcon.setAttribute('title', 'MLB Players');
-    playerIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=0';
+    playerIcon.href='https://theshownation.com/mlb20/watch_list?type=mlb_card';
     var equipmentIcon = document.createElement('a');
     equipmentIcon.classList.add('equipment-icon', 'cm-icon');
     equipmentIcon.setAttribute('title', 'Equipment');
-    equipmentIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=2';
+    equipmentIcon.href='https://theshownation.com/mlb20/watch_list?type=equipment';
     var stadiumIcon = document.createElement('a');
     stadiumIcon.classList.add('stadium-icon', 'cm-icon');
     stadiumIcon.setAttribute('title', 'Stadiums');
-    stadiumIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=1';
+    stadiumIcon.href='https://theshownation.com/mlb20/watch_list?type=stadium';
     var sponsorshipIcon = document.createElement('a');
     sponsorshipIcon.classList.add('sponsorship-icon', 'cm-icon');
     sponsorshipIcon.setAttribute('title', 'Sponsorships');
-    sponsorshipIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=3';
+    sponsorshipIcon.href='https://theshownation.com/mlb20/watch_list?type=sponsorship';
     var unlockableIcon = document.createElement('a');
     unlockableIcon.classList.add('unlockable-icon', 'cm-icon');
     unlockableIcon.setAttribute('title', 'Unlockables');
-    unlockableIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=7';
-    document.querySelector('.layout-heading').append(playerIcon, equipmentIcon, stadiumIcon, sponsorshipIcon, unlockableIcon);
+    unlockableIcon.href='https://theshownation.com/mlb20/watch_list?type=unlockable';
+    document.querySelector('.page-head').append(playerIcon, equipmentIcon, stadiumIcon, sponsorshipIcon, unlockableIcon);
 
-    fetch('https://mlb19.theshownation.com/community_market/shortcuts').then( function(response) {
+    fetch('https://theshownation.com/mlb20/saved_searches').then( function(response) {
         if (response.ok) {
             return response.text()
           } else {
@@ -675,7 +675,7 @@ function go() {
             newLink.classList.add('cm-link');
             newLink.href = link;
             newLink.textContent = title;
-            document.querySelector('.layout-heading').append(newLink);
+            document.querySelector('.page-head').append(newLink);
         });
     }).catch( function(e) {
         console.log(e);
@@ -723,7 +723,7 @@ function go() {
         if(e.data.hasOwnProperty('itemName'))
          {
             if(settings.webNotifications) {
-                var url = `https://mlb19.theshownation.com/community_market/listings/${e.data.itemId}`
+                var url = `https://theshownation.com/mlb20/items/${e.data.itemId}`
                 fetch(url).
                 then( function(response) {
                 if (response.ok) {

@@ -44,7 +44,7 @@ function getLinks(b){
         var itemId = item.href.match(/[^\/]+$/g);
 
         if(!allSales[itemId]){
-            allSales[itemId] = {'name': itemName, 'buys':Array(), 'sells':Array(), 'url': "https://mlb19.theshownation.com/community_market/listings/"+itemId, 'mostRecentBuy': null, 'mostRecentSell': null };
+            allSales[itemId] = {'name': itemName, 'buys':Array(), 'sells':Array(), 'url': "https://theshownation.com/mlb20/items/"+itemId, 'mostRecentBuy': null, 'mostRecentSell': null };
         }
 
         var itemBuyOrSell = $(this).find('td')[1].innerText.match(/([^\s]+)\sfor/)[1];
@@ -118,7 +118,7 @@ var runningTotal=0;
 
     //range.push(-1);
 
-    var baseUrl = 'https://mlb19.theshownation.com/community_market/orders/completed?page=';
+    var baseUrl = 'https://theshownation.com/mlb20/orders/completed_orders?page=';
     var fragment = document.createDocumentFragment();
     range.forEach(function(i){
         if(i!=0){
@@ -177,7 +177,7 @@ var runningTotal=0;
     }
     else
     {
-        $($('.title-layout-heading').children()[0]).append("<small> [ <a href=\"https://mlb19.theshownation.com/community_market/orders/completed?page=0\"> History </a> ]</small>");
+        $($('.title-layout-heading').children()[0]).append("<small> [ <a href=\"https://theshownation.com/mlb20/orders/completed_orders?page=0\"> History </a> ]</small>");
     }
 
 })();

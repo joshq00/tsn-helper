@@ -389,3 +389,7 @@ table.items-results-table td a {
 .menu-list.collapse.horizontal {
     float: right;
 }
+
+.title-form input {
+    padding: 0px !important;
+}

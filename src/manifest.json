@@ -1,8 +1,8 @@
 {
     "manifest_version": 2,
-    "name": "MLB The Show Nation: Helper Extension 2019",
+    "name": "MLB The Show Nation: Helper Extension 2020",
     "description": "Helper extension to make MLB The Show Nation website more usable",
-    "version": "2019.4.30.1",
+    "version": "2020.3.28.1",
     "permissions": [
         "background",
         "contextMenus",
@@ -11,11 +11,11 @@
         "webRequestBlocking",
         "activeTab",
         "tabs",
-        "https://mlb19.theshownation.com/*"
+        "https://theshownation.com/mlb20/*"
       ],
     "externally_connectable": {
       "ids": ["*"],
-      "matches": ["https://mlb19.theshownation.com/*"]
+      "matches": ["https://theshownation.com/mlb20/*"]
     },
     "omnibox": { "keyword" : "mlb" },
     "icons": { "16": "icons/16.png",
@@ -60,7 +60,7 @@
     "content_scripts": [
       {
         "matches": [
-          "https://mlb19.theshownation.com/*"
+          "https://theshownation.com/mlb20/*"
         ],
         "all_frames": true,
         "js": ["defaults.inject.js", "updateHeaders.content.js"],
@@ -68,12 +68,12 @@
       },
       {
         "matches": [
-            "https://mlb19.theshownation.com/community_market*"
+            "https://theshownation.com/mlb20/community_market*"
           ],
         "exclude_globs": [
-          "https://mlb19.theshownation.com/community_market/listings/*",
-          "https://mlb19.theshownation.com/community_market/orders/*",
-          "https://mlb19.theshownation.com/community_market/shortcuts"
+          "https://theshownation.com/mlb20/listings/*",
+          "https://theshownation.com/mlb20/community_market/orders/*",
+          "https://theshownation.com/mlb20/community_market/shortcuts"
           ],
           "all_frames": true,
           "js": ["CommunityMarketHelper.inject.js"],
@@ -82,7 +82,7 @@
       },
       {
         "matches": [
-          "https://mlb19.theshownation.com/community_market/listings/*"
+          "https://theshownation.com/mlb20/items/*"
         ],
         "all_frames": true,
         "js": ["ProfitReporter.inject.js"],
@@ -90,7 +90,7 @@
       },
       {
         "matches": [
-          "https://mlb19.theshownation.com/community_market/orders/*"  
+          "https://theshownation.com/mlb20/orders/completed_orders"  
         ],
         "all_frames": true,
         "js": ["CompletedOrders.inject.js"],
@@ -98,7 +98,7 @@
       },
       {
         "matches": [
-          "https://mlb19.theshownation.com/community_market/orders/open"  
+          "https://theshownation.com/mlb20/orders/open_orders"  
         ],
         "all_frames": true,
         "js": ["OpenOrders.inject.js"],
@@ -106,7 +106,7 @@
       },
       {
         "matches": [
-          "https://mlb19.theshownation.com/dashboard"  
+          "https://theshownation.com/mlb20/dashboard"  
         ],
         "all_frames": true,
         "js": ["background.inject.js"],

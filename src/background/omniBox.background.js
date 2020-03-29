@@ -64,7 +64,7 @@ function search(query, callback) {
     else
       query = '"' + query + '"';*/
   
-    var url = "https://mlb19.theshownation.com/community_market/quick_search.json?term=" + query ;
+    var url = "https://theshownation.com/mlb20/community_market/quick_search.json?term=" + query ;
     var req = new XMLHttpRequest();
     req.open("GET", url, true);
     req.setRequestHeader("GData-Version", "2");

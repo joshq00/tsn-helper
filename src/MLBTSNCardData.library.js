@@ -208,20 +208,23 @@ function cardData(b, doc=false, id=''){
     else
     {
    // console.log(b);
-    var name = $($(b).find('.title-widget-main h1')[0]).contents().slice(-1)[0].textContent;
+    var name = $($(b).find('h1')[0]).contents().slice(-1)[0].textContent;
     // var name = $($(b).find('.marketplace-main-heading .name')[0]).text();
     if (name==""){
-        name = $($(b).find('.marketplace-main-heading h2')[0]).text();
+        name = $($(b).find('h2')[0]).text();
     }
     try{var jersey = $($(b).find('.player-info-number')[0]).text().match(/\d+/)[0];}
     catch(error){jersey='';}
 
-    var rating = $($(b).find('.card-overall')[0]).text();
+    var rating = $($(b).find('.mlb20-card-rarity')[0]).text();
     var buyForm = $(b).find('#create-buy-order-form')[0];
+    $(buyForm).html($(buyForm).html().replace('Price',''))
     var buyInput = buyForm.querySelector('#price');
     var buyButton = buyForm.querySelector('button');
     buyInput.setAttribute('placeholder', '');
     var sellForm = $(b).find('#create-sell-order-form')[0];
+    $(sellForm).find('.seller-tax').remove();
+    $(sellForm).html($(sellForm).html().replace('Price',''))
     var sellInput = sellForm.querySelector('#price');
     sellInput.setAttribute('placeholder', '');
     var sellButton = sellForm.querySelector('button');
@@ -241,7 +244,7 @@ function cardData(b, doc=false, id=''){
     else if ($(b).find('.gold').length > 0 || $(b).find('.card-bg-gold').length > 0 ){  cardClass = 'gold';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-gold.png'; }
     else if ($(b).find('.diamond').length > 0 || $(b).find('.card-bg-diamond').length > 0 ){  cardClass = 'diamond';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-diamond.png';}
 
-    var cardImage = $(b).find('.img-responsive')[0].getAttribute('data-src');
+    var cardImage = $(b).find('.mlb20-card-actionshot')[0].getAttribute('src');
     var cardType = 'player';
     var quickSellValue = 0;
     var exchangeValue = 0;
@@ -314,7 +317,7 @@ function cardData(b, doc=false, id=''){
             );
         }
 
-        var balance = $(b).find('.currency-widget-inner')[0];
+        var balance = $(b).find('.stubs')[0];
         var balanceAmt = parseInt(balance.textContent.replace(/[^\d]/gi, ''));
         var balanceStr = '<span><img class="inline-icon-sm" src="https://s3.amazonaws.com/the-show-websites/mlb19_portal/5/img/shared/stubs.png">'+balanceAmt.toLocaleString()+"</span>";
 
@@ -346,8 +349,8 @@ function cardData(b, doc=false, id=''){
     //var sellable = parseInt($($(b).find('html body div div div div div div div div div div div:contains("Sellable")')[0]).text().match(/\d+/g));
     // console.log(b);
     var sellable = 0; var owned = 0; 
-    try{  sellable = parseInt($(b).find('div.mini-widget-main:contains("Sellable")')[0].textContent.replace("Sellable | ", ""));
-    owned = parseInt($(b).find('div.mini-widget-main:contains("Owned")')[0].textContent.replace("Owned | ", "")); }
+    try{  sellable = parseInt($(b).find('div.well:contains("Sellable")')[0].textContent.replace("Sellable | ", ""));
+    owned = parseInt($(b).find('div.well:contains("Owned")')[0].textContent.replace("Owned | ", "")); }
     catch(error) { console.log(error); }
 
     var dates = [];
@@ -502,11 +505,13 @@ function cardData(b, doc=false, id=''){
     buyInput.value = winningBuy ? parseInt(sellNow).toLocaleString() : parseInt(sellNow + 1).toLocaleString();
     sellInput.setAttribute('data-value', sellInput.value);
     buyInput.setAttribute('data-value', buyInput.value);
+    sellInput.style.padding = "0px !important"
+    buyInput.style.padding = "0px !important"
     buyButton.innerHTML = "+BUY";
-    buyButton.style.padding = "1px";
+    buyButton.style.padding = "1px !important";
     buyButton.style.height = "100%"
     sellButton.innerHTML = "+SELL";
-    sellButton.style.padding = "1px";
+    sellButton.style.padding = "1px !important";
     sellButton.style.height = "100%"
 
     return {

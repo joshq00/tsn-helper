@@ -10,7 +10,7 @@ var topOrderHashPageOne = '';
 function completedOrdersCheck(page=1, topOrderHashPageOne = '') {
     if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' || md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
     if ( typeof $ !== "undefined" && typeof toastr !== "undefined") {
-var url = 'https://mlb19.theshownation.com/community_market/orders/completed';
+var url = 'https://theshownation.com/mlb20/orders/completed_orders';
 if ( page > 1 ) {
     url += '?page='+page;
 }
@@ -229,10 +229,10 @@ var balancePlusBuysAmt = 0;
 
 function openOrdersCheck() {
     clearInterval(openOrdersInterval);
-    // https://mlb19.theshownation.com/community_market/orders/open
+    
     if ( typeof $ !== "undefined" ) {
         
-        var url = 'https://mlb19.theshownation.com/community_market/orders/open';
+        var url = 'https://theshownation.com/mlb20/orders/open_orders';
         $.ajax({url:url}).done(function(b){
             b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
            // console.log(b);
@@ -283,7 +283,7 @@ var openOrdersInterval = setInterval(openOrdersCheck,20000);
 var doneInitial = false;
 function initialStubsCheck() {
     if (typeof $ !== "undefined" ) {
-        var url = 'https://mlb19.theshownation.com/dashboard';
+        var url = 'https://theshownation.com/mlb20/dashboard';
         $.ajax({url:url}).done(function(b){
             b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
            // console.log(b);

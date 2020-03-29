@@ -6,12 +6,12 @@ import moment from './lib/moment.js'
 
 function tsnGo() {
     'use strict';
-    if(typeof $ !== "undefined" &&  $('.header-logo a').length > 0 && document.getElementsByTagName('footer').length > 0){
+    if(typeof $ !== "undefined" &&  $('.global-logo a').length > 0 && document.getElementsByTagName('footer').length > 0){
     
     var doc = document;
     // Add hidden settings div
     
-    var header = document.getElementsByClassName('header-container')[0];
+    var header = document.getElementsByClassName('global-topbar')[0];
     var headerFragment = document.createDocumentFragment();
     var settingsDiv = document.createElement('div');
       settingsDiv.id = 'tm-settings';
@@ -156,16 +156,16 @@ function tsnGo() {
       headerFragment.appendChild(settingsDiv);
 
 
-    var contentContainer = document.getElementsByClassName("layout-wrapper")[0];
+    var contentContainer = document.getElementsByClassName("page-wrap")[0];
     contentContainer.prepend(headerFragment);
 
     // Add settings icon to navigation
-    var menus = document.getElementsByClassName('header-search');
+    var menus = document.querySelectorAll('.global-menu .global-menu-links');
     for (var menu = 0; menu < menus.length; menu++){
     //$(menus).each(function(menu){
         var buttonFragment = document.createDocumentFragment();
         var li = document.createElement('li');
-        var a = document.createElement('a');
+        var a = document.createElement('div');
         a.href="#";
         a.classList.add('header-icon', 'white-icon', 'settings-icon');
         var settingsButton = document.createElement('span');
@@ -298,6 +298,7 @@ function tsnGo() {
     }
     }
     else {
+        console.log("Waiting...");
         setTimeout(tsnGo, 250);
     }
 
