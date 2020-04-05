@@ -2,7 +2,7 @@
     "manifest_version": 2,
     "name": "MLB The Show Nation: Helper Extension 2020",
     "description": "Helper extension to make MLB The Show Nation website more usable",
-    "version": "2020.3.29.1",
+    "version": "2020.4.5.1",
     "permissions": [
         "background",
         "contextMenus",
