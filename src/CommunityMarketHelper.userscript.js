@@ -169,7 +169,7 @@ function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
     var cardSelector;
     if(onlyFavorites) { 
         clearTimeout(favoritesTimeout); 
-        cardSelector = $(tables).find('td:nth-child(1):has(.favorites-icon-active) ~ td:nth-child(3) a'); 
+        cardSelector = $(tables).find('td:nth-child(1):has(.mlb12-heart-solid) ~ td:nth-child(3) a'); 
     }
     else if (onlyOpen) {
         clearTimeout(openTimeout);
@@ -280,7 +280,7 @@ function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
                 var favoriteTd = $(this).parent().parent().find('td:nth-child(1)');
                 favoriteTd[0].classList.add("short");
 
-                $(favoriteTd[0]).attr("data-sort", $(favoriteTd[0]).find('.favorites-icon-active').length > 0 ? 1 + parseFloat(card.ppm * 0.00001).toFixed(5) : parseFloat(card.ppm * 0.00001).toFixed(5));
+                $(favoriteTd[0]).attr("data-sort", $(favoriteTd[0]).find('.mlb12-heart-solid').length > 0 ? 1 + parseFloat(card.ppm * 0.00001).toFixed(5) : parseFloat(card.ppm * 0.00001).toFixed(5));
 
                 var imgTd = $(this).parent().parent().find('td:nth-child(2)');
                 imgTd[0].classList.add("short");
@@ -534,7 +534,7 @@ function orderHelper(onePage = false){
     $(tables).find('tr td:nth-child(2) img').attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
     $(tables).find('tr td:nth-child(1)').each(function(i)
         {
-            $(this).attr("data-sort", $(this).find('.favorites-icon-active').length > 0 ? 1 : 0);
+            $(this).attr("data-sort", $(this).find('.mlb12-heart-solid').length > 0 ? 1 : 0);
         });
 
     //tables.style.display = 'flex';
@@ -582,7 +582,7 @@ function orderHelper(onePage = false){
             }
             doneNum = doneNum + 1;
             if(doneNum == numPages){
-                sort = new Tablesort(document.getElementsByTagName('table')[0], { descending: true });
+                sort = new Tablesort(tables.parentElement, { descending: true });
                 marketHelper()
             }
 
@@ -591,7 +591,7 @@ function orderHelper(onePage = false){
     }
     else
     {
-               sort = new Tablesort(document.getElementsByTagName('table')[0], { descending: true });
+               sort = new Tablesort(tables.parentElement, { descending: true });
                marketHelper();
     }
 
@@ -702,7 +702,7 @@ function go() {
     if (!settings.showBuyFrame ) {
         helperFrame.style.height ='1px';
     }
-    $('.sidebar-section-top-inner').append(helperFrame);
+    $('.layout-secondary').append(helperFrame);
     helperFrame.onload = function(){
                       //  toastr["success"]("Order created","Done!");
                       

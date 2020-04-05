@@ -219,7 +219,7 @@ function setRefresh(interval=undefined) {
 
 function go() {
     'use strict';
-    if( typeof $ !== 'undefined'  && ( $('.buy-orders-table thead').length > 0 || $('.sell-orders-table thead').length > 0 ) ){
+    if( typeof $ !== 'undefined'  &&  $('.section-block thead').length > 0  ){
 
     //$('.marketplace-main-heading').children()[0].append(" ("+$('.order').length+")");
     //$('.marketplace-main-heading').append('<div style="float:right">Refresh interval: <input id="refresh-interval" size="5" value=".5"></input></div>');
@@ -245,7 +245,7 @@ function go() {
     if (!settings.showBuyFrame ) {
         helperFrame.style.height ='1px';
     }
-    $('.sidebar-section-top-inner').append(helperFrame);
+    $('.layout-secondary').append(helperFrame);
     helperFrame.onload = function(){
                       //  toastr["success"]("Order created","Done!");
                       

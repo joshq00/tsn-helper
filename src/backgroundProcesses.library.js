@@ -49,7 +49,7 @@ if(localStorage.hasOwnProperty('tsn-completedHash')){
                 text = text.replace(/<script>[^<]+<\/script>/gi, "");
                 text = text.replace(/<link[^>]+>/gi, "");
                 var frag = document.createRange().createContextualFragment(text);
-                var allOrders = frag.querySelectorAll('.completed-orders-table tbody tr');
+                var allOrders = frag.querySelectorAll('.section-block tbody tr');
                 var topOrder = allOrders[0];
                 const topOrderHash = md5(topOrder.innerHTML);
 
@@ -240,20 +240,24 @@ function openOrdersCheck() {
             // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/logos/logo2_wsh.png','https://s3.amazonaws.com/mlb17-shared/dist/7/img_teams/cap/logo2_wsh.png');
             // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/actionshots/3785374b5e5df43203dc02054105cf58.jpg','https://s3.amazonaws.com/mlb-theshownation/tsn18/3/img/shared/default-actionshot.jpg');
             b = $.parseHTML(b);
-            var numBuys = $(b).find('.buy-orders-table tbody tr').length;
-            var numSells = $(b).find('.sell-orders-table tbody tr').length;
+            console.log(b);
+            var numBuys = $($(b).find('.section-block').first()).find('tbody tr').length;
+            console.log(numBuys);
+            
+            var numSells = $($(b).find('.section-block').last()).find('tbody tr').length;
+            console.log(numSells);
             buysAmount = 0;
             sellsAmount = 0;
 
             if ( numBuys > 0 ) {
-                $(b).find('.buy-orders-table tbody tr td:nth-child(2)').each( function(i) {
+                $($(b).find('.section-block').first()).find('tbody tr td:nth-child(3)').each( function(i) {
                     
                     buysAmount = buysAmount + parseInt($(this)[0].textContent.replace(/[^\d]/gi, ''));
                 });
                 
             }
             if ( numSells > 0 ) {
-                $(b).find('.sell-orders-table tbody tr td:nth-child(2)').each( function(i) {
+                $($(b).find('.section-block').last()).find('tbody tr td:nth-child(3)').each( function(i) {
                     sellsAmount = sellsAmount + Math.floor(parseInt($(this)[0].textContent.replace(/[^\d]/gi, '')) * .9);
                 });
                 
@@ -274,6 +278,7 @@ function openOrdersCheck() {
 
     }
     else{
+        console.log("Waiting.........")
         setTimeout(openOrdersCheck, 200)
     }
 
@@ -291,7 +296,7 @@ function initialStubsCheck() {
             // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/logos/logo2_wsh.png','https://s3.amazonaws.com/mlb17-shared/dist/7/img_teams/cap/logo2_wsh.png');
             // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/actionshots/3785374b5e5df43203dc02054105cf58.jpg','https://s3.amazonaws.com/mlb-theshownation/tsn18/3/img/shared/default-actionshot.jpg');
             b = $.parseHTML(b);
-            balanceAmt = parseInt($(b).find('.currency-widget-amount')[0].textContent.replace(/[^\d]/gi,''));
+            balanceAmt = parseInt($(b).find('div.well.stubs')[0].textContent.replace(/[^\d]/gi,''));
             balancePlusBuysAmt = balanceAmt + buysAmount;
             localStorage.setItem('tsn-balanceAmt',balanceAmt);
             localStorage.setItem('tsn-balancePlusBuysAmt',balancePlusBuysAmt);

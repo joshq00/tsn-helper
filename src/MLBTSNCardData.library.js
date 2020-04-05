@@ -160,7 +160,7 @@ var quickSellValues = {
     },
     "unlockable":{
         "silver":100,
-        "gold":250,
+        "gold":500,
         "diamond":1000
         },
     "stadium":{
@@ -247,12 +247,8 @@ function cardData(b, doc=false, id='') {
     catch(error){ teamLogo = 'https://s3.amazonaws.com/mlb-theshownation/tsn18/8/img/shared/mlb19-pre-order-small.png'; console.log(error);}
     var cardClass = '';
     var shield = '';
-    if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('common')){  cardClass = 'common';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-common.png';}
-    else if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('bronze')){  cardClass = 'bronze';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-bronze.png'; }
-    else if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('silver')){  cardClass = 'silver';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-silver.png'; }
-    else if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('gold')){  cardClass = 'gold';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-gold.png'; }
-    else if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('diamond')){  cardClass = 'diamond';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-diamond.png';}
 
+    
 
 
     try { 
@@ -264,11 +260,36 @@ function cardData(b, doc=false, id='') {
     var quickSellValue = 0;
     var exchangeValue = 0;
 
-    if ($(b).find('.mlb20-card-actionshot-wrapper').length > 0){  cardType = 'player';  exchangeValue = exchangeValues['player'][rating]; }
-    else if ($(b).find('.mlb20-card-equipment-wrapper').length > 0){  cardType = 'equipment';  }
-    else if ($(b).find('.mlb20-card-stadium-wrapper').length > 0){  cardType = 'stadium';  }
-    else if ($(b).find('.mlb20-card-sponsorship-wrapper').length > 0){  cardType = 'sponsorship';  }
-    else if ($(b).find('.mlb20-card-unlockable-wrapper').length > 0){  cardType = 'unlockable';  }
+    var cardElement = {
+        player: '.mlb20-card-actionshot-wrapper',
+        equipment: '.mlb20-card-equipment-wrapper',
+        stadium: '.mlb20-card-stadium-wrapper',
+        sponsorship: '.mlb20-card-sponsorship-wrapper',
+        unlockable: '.mlb20-card-unlockable-wrapper',
+    }
+
+    if ($(b).find(cardElement.player).length > 0){  cardType = 'player';  exchangeValue = exchangeValues['player'][rating]; }
+    else if ($(b).find(cardElement.equipment).length > 0){  cardType = 'equipment';  }
+    else if ($(b).find(cardElement.stadium).length > 0){  cardType = 'stadium';  }
+    else if ($(b).find(cardElement.sponsorship).length > 0){  cardType = 'sponsorship';  }
+    else if ($(b).find(cardElement.unlockable).length > 0){  cardType = 'unlockable';  }
+
+    try {
+        if(cardType=='player') {
+        if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('common')){  cardClass = 'common';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-common.png';}
+        else if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('bronze')){  cardClass = 'bronze';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-bronze.png'; }
+        else if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('silver')){  cardClass = 'silver';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-silver.png'; }
+        else if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('gold')){  cardClass = 'gold';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-gold.png'; }
+        else if (!!$(b).find('.mlb20-card-rarity')[0].style.backgroundImage.match('diamond')){  cardClass = 'diamond';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-diamond.png';}
+        } else {
+            if (!!$(b).find(cardElement[cardType])[0].style.backgroundImage.match('common')){  cardClass = 'common';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-common.png';}
+            else if (!!$(b).find(cardElement[cardType])[0].style.backgroundImage.match('bronze')){  cardClass = 'bronze';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-bronze.png'; }
+            else if (!!$(b).find(cardElement[cardType])[0].style.backgroundImage.match('silver')){  cardClass = 'silver';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-silver.png'; }
+            else if (!!$(b).find(cardElement[cardType])[0].style.backgroundImage.match('gold')){  cardClass = 'gold';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-gold.png'; }
+            else if (!!$(b).find(cardElement[cardType])[0].style.backgroundImage.match('diamond')){  cardClass = 'diamond';  shield = 'https://s3.amazonaws.com/the-show-websites/mlb19_portal/2/img/rarity/shield-diamond.png';}
+            
+        }
+    } catch(e) { console.log(e); }
 
     console.log(cardType);
 
@@ -314,7 +335,7 @@ function cardData(b, doc=false, id='') {
          buyOrdersTable = buyOrdersHeader.parentElement.parentElement.parentElement;
             //console.log(buyOrdersTable);
             $(buyOrdersTable).find("tbody tr").each(function(i) {
-                var buyAmt = parseInt($(this).find("td:nth-child(2)")[0].textContent.replace(',',''));
+                var buyAmt = parseInt($(this).find("td:nth-child(3)")[0].textContent.replace(/[^\d]/gi, ''));
                 // console.log(buyAmt);
                 var cancelForm = $(this).find("form")[0];
                 var cancelButton = $(cancelForm).find("button")[0];
@@ -325,6 +346,7 @@ function cardData(b, doc=false, id='') {
                 }
                 else if (buyAmt == sellNow ) {
                  winningBuy = true;
+                 cancelButton.style.backgroundColor = 'black';
                 }
                 cancelButton.dataset["confirm"] = false
                 cancelBuyButtons.push(cancelForm);
@@ -347,17 +369,19 @@ function cardData(b, doc=false, id='') {
         if(sellOrdersHeader != null) {
          sellOrdersTable = sellOrdersHeader.parentElement.parentElement.parentElement;
             $(sellOrdersTable).find("tbody tr").each(function(i) {
-                var buyAmt = parseInt($(this).find("td:nth-child(2)")[0].textContent.replace(',',''));
+                var buyAmt = parseInt($(this).find("td:nth-child(3)")[0].textContent.replace(/[^\d]/gi, ''));
                 console.log(buyAmt);
                 var cancelForm = $(this).find("form")[0];
                 var cancelButton = $(cancelForm).find("button")[0];
                 cancelButton.innerHTML = "S: "+buyAmt+" <span class='close-button-icon'></span>";
+                console.log(buyAmt, buyNow, typeof(buyAmt), typeof(buyNow))
                 if (buyAmt > buyNow) {
                  outbidSell = true;
                  cancelButton.style.backgroundColor = 'red';
                 }
                 else if (buyAmt == buyNow ) {
                  winningSell = true;
+                 cancelButton.style.backgroundColor = 'black';
                 }
                 cancelButton.dataset["confirm"] = false
                 cancelSellButtons.push(cancelForm);
@@ -526,7 +550,9 @@ function cardData(b, doc=false, id='') {
         sellInput.value = winningSell ? parseInt(buyNow).toLocaleString() : parseInt(buyNow - 1).toLocaleString();
     } catch (e) { console.log(e); }
     
-    buyInput.value = winningBuy ? parseInt(sellNow).toLocaleString() : parseInt(sellNow + 1).toLocaleString();
+    try {
+        buyInput.value = winningBuy ? parseInt(sellNow).toLocaleString() : parseInt(sellNow + 1).toLocaleString();
+    } catch(e) { console.log(e); }
 
     try { 
         sellInput.setAttribute('data-value', sellInput.value);
