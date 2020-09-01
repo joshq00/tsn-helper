@@ -1,3 +1,43 @@
+footer { display: none; }
+button.title-button {
+  padding: 0;
+  height: 2em;
+}
+.page-head-items, .page-head-items .section-items {
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.page-wrap-items .page-head-items .section-items-secondary /* stat section */
+{
+  background-color: #7b1212;
+}
+.player-stat-tables .player-info-usedin, /* used in */
+footer { display: none; }
+.section-items {
+  background: white;
+  box-shadow: none;
+}
+.page-body-items .mlb20-card-topps,
+.page-body-items .section-market-info,
+.referer-inner /* stupid 'go back' */
+{
+  display: none !important;
+}
+a[href*=universal_profiles] {
+  display: none;
+}
+form button[disabled],
+form[target=helperFrame][action*=create] button[type=submit][data-disable-with] {
+  max-width: 25px;
+  overflow: hidden;
+}
+
+div.page-wrap-items > div.page-head-items div.section-items-secondary h1 {
+  font-size: 1em;
+}
+.global-logo .global-logo-large { display: none; }
+.tsn-subnav .tsn-subnav-inner { padding: 0 !important; }
+.page-head-items .page-body-items-inner { padding: 0 !important; }
 th[role=columnheader]:not(.no-sort) {
 	cursor: pointer;
 }
@@ -388,4 +428,8 @@ table.items-results-table td a {
 
 .menu-list.collapse.horizontal {
     float: right;
+}
+
+.title-form input {
+    padding: 0px !important;
 }

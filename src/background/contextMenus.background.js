@@ -1,7 +1,7 @@
 chrome.runtime.onInstalled.addListener(function() {
     chrome.contextMenus.create({
       "id": "cm_parent",
-      "title": "MLBTSN 19",
+      "title": "MLBTSN 20",
       "contexts": ["all"]
     });
     chrome.contextMenus.create({
@@ -37,10 +37,10 @@ chrome.runtime.onInstalled.addListener(function() {
 
     chrome.contextMenus.onClicked.addListener(function (info, tab){
       urls = {
-        'cm_communitymarket': 'https://mlb19.theshownation.com/community_market',
-        'cm_openorders': 'https://mlb19.theshownation.com/community_market/orders/open',
-        'cm_completedorders': 'https://mlb19.theshownation.com/community_market/orders/completed',
-        'cm_completedordershistory': 'https://mlb19.theshownation.com/community_market/orders/completed?page=0'
+        'cm_communitymarket': 'https://theshownation.com/mlb20/community_market',
+        'cm_openorders': 'https://theshownation.com/mlb20/orders/open_orders',
+        'cm_completedorders': 'https://theshownation.com/mlb20/orders/completed_orders',
+        'cm_completedordershistory': 'https://theshownation.com/mlb20/orders/completed_orders?page=0'
       };
       if( urls[info.menuItemId]) {
         chrome.tabs.create({ url: urls[info.menuItemId] });

@@ -134,7 +134,7 @@ $(table_headers).find('th:nth-child(6)').after("<th data-sort-method=\"number\" 
 */
 
 var dataPoints = {
-        
+
     'profitMargin': {'title': "Profit Margin", 'heading': '±', 'class': 'short', 'patronsOnly': false},
     'myProfit': {'title': "Profit Margin from last Buy", 'heading': '±<sub>Δ</sub>', 'class': 'short', 'patronsOnly': true},
     'owned': {'title': "Number Owned", 'heading': '#<sub>O</sub>', 'class': 'short', 'patronsOnly': false},
@@ -147,8 +147,8 @@ var dataPoints = {
     'buyTrend': {'title': "Sell factor (current difference from average)", 'heading': 'ƒ<sub>SELL</sub>', 'class': 'short', 'patronsOnly': true},
     'avgSellNow': {'title': "Average buy order price", 'heading': 'μ<sub>BUY</sub>', 'class': 'short', 'patronsOnly': true},
     'sellTrend': {'title': "Buy factor (current difference from average)", 'heading': 'ƒ<sub>BUY</sub>', 'class': 'short', 'patronsOnly': true},
-    'avgProfit': {'title': "Average buy order price", 'heading': 'μ<sub>±</sub>', 'class': 'short', 'patronsOnly': false},
-    'avgRoi': {'title': "Average buy order price", 'heading': 'μ<sub>ROI</sub>', 'class': 'short', 'patronsOnly': true},
+    'avgProfit': {'title': "Average profit", 'heading': 'μ<sub>±</sub>', 'class': 'short', 'patronsOnly': false},
+    'avgRoi': {'title': "Average ROI", 'heading': 'μ<sub>ROI</sub>', 'class': 'short', 'patronsOnly': true},
     'perExchange': {'title': "Exchange Point per Stub", 'heading': 'XCH', 'class': 'short', 'patronsOnly': true},
     'openOrders': {'title': "Open Orders", 'heading': 'OPEN', 'class': 'short', 'patronsOnly': false},
     'maxGap': {'title': "Max Gap", 'heading': '^GAP', 'class': 'short', 'patronsOnly': false},
@@ -157,9 +157,9 @@ var dataPoints = {
 
 
 function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
-    var itemType = document.querySelector('.items-results-table thead th:nth-child(3)').textContent.toLowerCase();
+    var itemType = document.querySelector('table thead th:nth-child(3)').textContent.toLowerCase();
    // console.log("Debug1");
-    
+
    // console.log("Debug2");
 
     console.log(onlyFavorites, specificTarget, onlyOpen);
@@ -167,311 +167,293 @@ function marketHelper(onlyFavorites=false, specificTarget='', onlyOpen=false){
     $('.item-name').css('width','20%');
 
     var cardSelector;
-    if(onlyFavorites) { 
-        clearTimeout(favoritesTimeout); 
-        cardSelector = $(tables).find('td:nth-child(1):has(.favorites-icon-active) ~ td:nth-child(3) a'); 
+
+  const rows = [...(() => {
+    const rows = $('table:last tbody tr')
+    const favorites = rows.filter(':has(td:nth-child(1):has(.mlb12-heart-solid) ~ td:nth-child(3) a)')
+    const opens = rows.filter(':has(td:nth-child(3) a[data-openorders="true"])')
+    const specific = rows.filter(`:has(td:nth-child(3) a[href="${specificTarget}"])`)
+
+    if(onlyFavorites) {
+        clearTimeout(favoritesTimeout);
+        // cardSelector = $(tables).find('td:nth-child(1):has(.mlb12-heart-solid) ~ td:nth-child(3) a');
+        return favorites
     }
-    else if (onlyOpen) {
+    if (onlyOpen) {
         clearTimeout(openTimeout);
-        cardSelector = $(tables).find('td:nth-child(3) a[data-openorders="true"]');
+        // cardSelector = $(tables).find('td:nth-child(3) a[data-openorders="true"]');
+      return opens
     }
-    else if (specificTarget != ''){
+    if (specificTarget != '' && specificTarget != 'blank' ){
         // console.log("Specific Target", specificTarget);
-        cardSelector = $(tables).find('td:nth-child(3) a[href="'+specificTarget+'"]');
+        // cardSelector = $(tables).find('td:nth-child(3) a[href="'+specificTarget+'"]');
+      return specific
 
-    } else { 
-        clearTimeout(favoritesTimeout); 
-        clearTimeout(openTimeout);
-        cardSelector = $(tables).find('td:nth-child(3) a'); 
     }
-        var howMany = cardSelector.length;
-        var howManyDone = 0;
+    clearTimeout(favoritesTimeout);
+    clearTimeout(openTimeout);
+    return rows
+  })()]
+    .map($)
 
-    cardSelector.each(function(i){
+  // replace image with spinner
+  rows.forEach( $row => $row.find('td:nth-child(2) img').replaceWith('<div class="reload-icon icon glyphicon-refresh-animate"></div>') )
+  rows.forEach( $row => $row.find( 'td > a' ).attr('target', 'blank') )
+  rows.forEach( $row => {
+    $row.find('.helperDiv').remove();
+    $row.find('#create-buy-order-form').remove();
+    $row.find('#create-sell-order-form').remove();
+    $row.find('td:has(>a)').append('<div class="helperDiv" />')
+  })
+  const cards = rows.map( $row => {
+      return ({
+        $row: $row,
+        id: $row.find('td > a').attr('href').split('/').slice(-1)[0],
+        uri: $row.find('td > a').attr('href'),
+        buyNow: parseInt($row.children()[4].innerText.trim()),
+        sellNow: parseInt($row.children()[5].innerText.trim()),
+        rating: parseInt($row.children()[3].innerText.trim()),
+      })
+    } )
 
-       var url = $(this).attr('href');
-        if (!firstTime[url]) {
-            this.innerHTML = this.textContent.replace(" ","<br />")
+  // var howMany = cardSelector.length;
+  const howMany = cards.length;
+  var howManyDone = 0;
+  const handleCard = card => {
+    if(isNaN(card.profitMargin)){
+      card.profitMargin = -99999;
+    }
+    if(isNaN(card.minutesPerSale)){
+      card.profitMargin = 99999;
+    }
+
+    card.$row.parent().css('background-color','');
+    card.sellForm.removeAttribute('id');
+    card.buyForm.removeAttribute('id');
+    Array.from( card.buyForm.querySelectorAll('#price') ).forEach(p => {
+      p.removeAttribute('id')
+      p.setAttribute('style', "padding: 0px !important; font-size:8pt;");
+    })
+    Array.from( card.sellForm.querySelectorAll('#price') ).forEach(p => {
+      p.removeAttribute('id')
+      p.setAttribute('style', "padding: 0px !important; font-size:8pt;");
+    })
+
+    card.$row.find('td > a').each(function() {
+      let bgcolor
+      if(isNaN(card.profitMargin)){
+        card.profitMargin = -1000;
+      }
+
+      // $(this).parent().parent().parent().css('order',1000-(card.profitMargin / (card.minutesPerSale * 2)).toFixed(0));
+      if (card[settings.heatFactor] < 0 ) {
+        bgcolor = 'rgba(0,0,255,0.45)';
+      }
+      else if( card[settings.heatFactor] > settings.hotness ){
+        bgcolor = 'rgba(255,0,0,0.45)';
+      }
+      else if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
+        md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
+
+        if ( settings.hotness >= card[settings.heatFactor] && card[settings.heatFactor] > settings.warmness ) {
+          bgcolor = 'rgba('+pickHex(parseFloat( ( ( card[settings.heatFactor] - settings.coolness) / ( settings.hotness - settings.coolness ) ).toFixed(2) ), "hot" ).join()+') !important';
+        }
+        else if ( settings.warmness >= card[settings.heatFactor] && card[settings.heatFactor] > settings.coolness ) {
+          bgcolor = 'rgba('+pickHex(parseFloat( ( ( card[settings.heatFactor] - settings.coolness) / ( settings.warmness - settings.coolness ) ).toFixed(2) ), "warm" ).join()+') !important';
+        }
+        else {
+          bgcolor = 'rgba('+pickHex(parseFloat( ( card[settings.heatFactor] / settings.coolness ).toFixed(2) ) , "cool" ).join()+') !important';
         }
 
-        var imgTd = $(this).parent().parent().find('td:nth-child(2)');
-        imgTd[0].innerHTML = '<div class="reload-icon icon glyphicon-refresh-animate"></div>';
 
+      }
+      card.$row.css('background-color',bgcolor+' !important');
+    })
 
-        var thisBuyNowPrice = "";
-        var thisSellNowPrice = "";
-        var profitMargin = "";
-        $.ajax({url:url, context:this}).done(function(b){
-            howManyDone++;
-            var card = cardData(b, false, url.split('/')[url.split('/').length -1]);
-            if (card.errors.length > 1)
-            {
-                for (var e of card.errors) {
-                  toastr["error"](e, "ERROR");
-                }
-
-            }
-            else
-            {
-            //console.log(card);
-            this.target = 'blank';
-            $(this).parent().find('.helperDiv').remove();
-            $(this).parent().find('#create-buy-order-form').remove();
-            $(this).parent().find('#create-sell-order-form').remove();
-
-            var thisDiv = document.createElement('div');
-            thisDiv.className = 'helperDiv';
-
-
-            $(this).parent().append(thisDiv);
-            //$(this).parent().css('display','flex');
-
-            if(isNaN(card.profitMargin)){
-               card.profitMargin = -99999;
-            }
-            if(isNaN(card.minutesPerSale)){
-               card.profitMargin = 99999;
-            }
-            /*
-            $(this).parent().append("<div class=\"helperDiv\" style=\"line-height:1em; \"><span style=\"font-size:80%; display:block;\">"+
-                                                              "Buy: <span class=\"stubs\"> </span>"+
-                                                              card.buyNow+
-                                                              " <span style=\"font-size:80%;\"> ("+card.minBuyNow+"-"+card.maxBuyNow+")</span></span>  <span style=\"font-size:80%; display:block;\">Sell: <span class=\"stubs\"> </span> "+
-                                                              card.sellNow+
-                                                              " <span style=\"font-size:80%;\">("+card.minSellNow+"-"+card.maxSellNow+")</span></span>  <span style=\"font-size:80%; display:block; \">Profit: <span class=\"stubs\"> </span> "+
-                                                              card.profitMargin+" <span style=\"font-size:80%;\"> (GAP "+card.profitGap+")</span><span style=\"font-size:80%; display:block; \">Sellable:  "+
-                                                              card.sellable+"</span><span style=\"font-size:80%; display:block; \">Rate:  "+
-                                                              card.minutesPerSale+" min/sale ("+card.soldLastHour+"/hr)</span><span style=\"font-size:80%; display:block\">"+
-                                                              (card.profitMargin / (card.minutesPerSale * 2)).toFixed(2)+" PP/M</span></div>");
-            */
-
-                //$(this).css('color','white');
-            //$(this).parent().css('display','flex');
-            $(this).parent().parent().parent().css('background-color','');
-            if(isNaN(card.profitMargin)){
-               card.profitMargin = -1000;
-            }
-
-            // $(this).parent().parent().parent().css('order',1000-(card.profitMargin / (card.minutesPerSale * 2)).toFixed(0));
-                if (card[settings.heatFactor] < 0 ) {
-                 bgcolor = 'rgba(0,0,255,0.45)';
-             }
-             else if( card[settings.heatFactor] > settings.hotness ){
-                bgcolor = 'rgba(255,0,0,0.45)';
-            }
-            else if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
-                  md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
-                var bgcolor = '';
-
-            if ( settings.hotness >= card[settings.heatFactor] && card[settings.heatFactor] > settings.warmness ) {
-                bgcolor = 'rgba('+pickHex(parseFloat( ( ( card[settings.heatFactor] - settings.coolness) / ( settings.hotness - settings.coolness ) ).toFixed(2) ), "hot" ).join()+') !important';
-            }
-            else if ( settings.warmness >= card[settings.heatFactor] && card[settings.heatFactor] > settings.coolness ) {
-                bgcolor = 'rgba('+pickHex(parseFloat( ( ( card[settings.heatFactor] - settings.coolness) / ( settings.warmness - settings.coolness ) ).toFixed(2) ), "warm" ).join()+') !important';
-            }
-                else {
-                    bgcolor = 'rgba('+pickHex(parseFloat( ( card[settings.heatFactor] / settings.coolness ).toFixed(2) ) , "cool" ).join()+') !important';
-                }
-
-
-            }
-                $(this).parent().parent().css('background-color',bgcolor+' !important');
-
-                var favoriteTd = $(this).parent().parent().find('td:nth-child(1)');
-                favoriteTd[0].classList.add("short");
-
-                $(favoriteTd[0]).attr("data-sort", $(favoriteTd[0]).find('.favorites-icon-active').length > 0 ? 1 + parseFloat(card.ppm * 0.00001).toFixed(5) : parseFloat(card.ppm * 0.00001).toFixed(5));
-
-                var imgTd = $(this).parent().parent().find('td:nth-child(2)');
-                imgTd[0].classList.add("short");
-
-                var refreshDiv = document.createElement('div');
-                refreshDiv.classList.add('reload-icon');
-                refreshDiv.classList.add('icon');
-
-                imgTd[0].innerHTML = '';
-                imgTd[0].append(refreshDiv);
-                refreshDiv.addEventListener("click", function(e) {
-                    marketHelper(false, url);
-                });
-
-                var nameTd = $(this).parent().parent().find('td:nth-child(3)');
-                nameTd[0].classList.add("long");
-
-                var nameLink = $(this).parent().parent().find('td:nth-child(3) a');
-                $(nameLink[0]).attr("data-openOrders", card.openOrders > 0 ? 'true' : 'false');
-
-                var ovrTd = $(this).parent().parent().find('td:nth-child(4)');
-                ovrTd[0].classList.add("short");
-                ovrTd[0].innerHTML = `<img src="${card.shield}" height="16px" width="16px">`;
-
-
-
-                
-
-                var buyTd = $(this).parent().parent().find('td:nth-child(5)');
-                buyTd[0].innerHTML = card.buyNow;
-                buyTd[0].classList.add("long");
-                $(buyTd).attr("data-sort", card.buyNow);
-                if (card.sellable > 0) {
-                buyTd.append(card.sellForm);
-                var sellButton = $(card.sellForm).find("button")[0];
-                sellButton.addEventListener("click", function(){
-                    imgTd[0].innerHTML = '<div class="reload-icon icon glyphicon-refresh-animate"></div>';
-                });
-                sellButton.innerHTML = "+S";
-                sellButton.style.padding = "1px";
-                sellButton.style.height = "100%"
-                var sellInput = $(card.sellForm).find("input#price")[0];
-                sellInput.style.padding = "0px";
-                }
-                for ( var cancelButton of card.cancelSellButtons ) {
-                    $(buyTd).append(cancelButton);
-                    cancelButton.target = "helperFrame";
-                    cancelButton.addEventListener("click", function(){
-                        imgTd[0].innerHTML = '<div class="reload-icon icon glyphicon-refresh-animate"></div>';
-                    });
-                }
-
-                var sellTd = $(this).parent().parent().find('td:nth-child(6)');
-                sellTd[0].innerHTML = card.sellNow;
-                sellTd[0].classList.add("long");
-                $(sellTd).attr("data-sort", card.sellNow);
-                sellTd.append(card.buyForm);
-                var buyButton = $(card.buyForm).find('button')[0]
-                buyButton.addEventListener("click", function(){
-                    imgTd[0].innerHTML = '<div class="reload-icon icon glyphicon-refresh-animate"></div>';
-                });
-                buyButton.innerHTML = "+B";
-                buyButton.style.padding = "1px";
-                buyButton.style.height = "100%"
-                var buyInput = $(card.buyForm).find("input#price")[0];
-                buyInput.style.padding = "0px";
-                for ( var cancelButton of card.cancelBuyButtons ) {
-                    $(sellTd).append(cancelButton);
-                    cancelButton.target = "helperFrame";
-                    cancelButton.addEventListener("click", function(){
-                        imgTd[0].innerHTML = '<div class="reload-icon icon glyphicon-refresh-animate"></div>';
-                    });
-                }
-
-                var i = 0;
-                for (const dataPoint in dataPoints){
-                    if ( !dataPoints[dataPoint].patronsOnly || 
-                        md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
-                        md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
-                            if ( ! settings.hiddenColumns.includes(dataPoint) ) {
-                            var thisTd = $(this).parent().parent().find('td:nth-child('+(i+7)+')');
-                            thisTd[0].innerHTML = card[dataPoint];
-                            i++;
-                            }
-
-                        }
-                }
-                /*
-                var profitTd = $(this).parent().parent().find('td:nth-child(7)');
-                profitTd[0].innerHTML = card.profitMargin;
-
-                var sellableTd = $(this).parent().parent().find('td:nth-child(8)');
-                sellableTd[0].innerHTML = card.sellable;
-
-                var roiTd = $(this).parent().parent().find('td:nth-child(9)');
-                roiTd[0].innerHTML = card.roi;
-
-                if ( card.sellable > 1 ) {
-                  sellableTd[0].style.fontWeight = "bold";
-                }
-                else
-                {
-                    sellableTd[0].style.fontWeight = "normal";
-                }
-
-                if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
-                  md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
-
-
-
-                var sphTd = $(this).parent().parent().find('td:nth-child(10)');
-                sphTd[0].innerHTML = card.salesPerHour;
-
-                var ppmTd = $(this).parent().parent().find('td:nth-child(11)');
-                ppmTd[0].innerHTML = card.ppm;
-
-                var gapTd = $(this).parent().parent().find('td:nth-child(12)');
-                gapTd[0].innerHTML = card.profitGap;
-
-                
-
-                var avgSellTd = $(this).parent().parent().find('td:nth-child(13)');
-                avgSellTd[0].innerHTML = card.avgBuyNow;
-
-                var sellTrendTd = $(this).parent().parent().find('td:nth-child(14)');
-                sellTrendTd[0].innerHTML = card.buyTrend;
-
-                var avgBuyTd = $(this).parent().parent().find('td:nth-child(15)');
-                avgBuyTd[0].innerHTML = card.avgSellNow;
-
-                var buyTrendTd = $(this).parent().parent().find('td:nth-child(16)');
-                buyTrendTd[0].innerHTML = card.sellTrend;
-
-                var avgProfitTd = $(this).parent().parent().find('td:nth-child(17)');
-                avgProfitTd[0].innerHTML = card.avgProfit;
-
-                var avgRoiTd = $(this).parent().parent().find('td:nth-child(18)');
-                avgRoiTd[0].innerHTML = card.avgRoi;
-                }*/
-
-                var brandTd = $(this).parent().parent().find('td:nth-last-child(2)');
-                $(brandTd).attr("data-sort", brandTd[0].textContent);
-                if(itemType === 'player') {
-                    brandTd[0].innerHTML = replaceBulk(brandTd[0].innerHTML, findReplaceSeries);
-                }
-                else if (itemType === 'equipment') {
-                    brandTd[0].innerHTML = replaceBulk(brandTd[0].innerHTML, findReplaceBrands);
-                }
-                
-
-                //$(theForm).css('width','50%');
-                $(card.buyForm).css('display','flex');
-                $($(card.buyForm).find('#price')[0]).val(card.winningBuy ? card.sellNow : card.sellNow+1);
-                card.buyForm.target = "helperFrame";
-
-
-                //$(this).parent().append(card.sellForm);
-                //$(theForm).css('width','50%');
-                $(card.sellForm).css('display','flex');
-                $($(card.sellForm).find('#price')[0]).val(card.winningSell ? card.buyNow : card.buyNow-1);
-                card.sellForm.target = "helperFrame";
-                //$($(this).parent().parent().children()[1]).append("<div class=\"helperDiv\" style=\"background-color:yellow; color:red\"><span class=\"stubs\"> </span> "+thisSellNowPrice+"</div>");
-                firstTime[url] = 1;
-                document.getElementById('helperStubsDiv').innerHTML = card.balanceStr;
-
-
-                if (howManyDone == howMany) {
-                    
-                    sort.refresh();
-                    
-                    if (specificTarget == '' ) {
-                        if(onlyOpen) {
-                            setRefresh(undefined, 'open');
-                        } else if (onlyFavorites) {
-                            setRefresh(undefined, 'favorites');
-                        } else {
-                            setRefresh(undefined, 'favorites'); 
-                            setRefresh(undefined, 'open');
-                        }
-                    }
-                }
-            }
-        });
-
+    card.$row.find('div[id^=market-favorite-item').css({
+      'min-height': '81px',
+      'padding': '25px 0',
     });
+    // card.$row.find('div[id^=market-favorite-item').css('padding', '25px 0')
+
+    var refreshDiv = document.createElement('div');
+    card.$row.find('td > a').each(function() {
+      var favoriteTd = card.$row.find('td:nth-child(1)');
+      favoriteTd[0].classList.add("short");
+
+      $(favoriteTd[0]).attr("data-sort", $(favoriteTd[0]).find('.mlb12-heart-solid').length > 0 ? 1 + parseFloat(card.ppm * 0.00001).toFixed(5) : parseFloat(card.ppm * 0.00001).toFixed(5));
+
+      var imgTd = $(this).parent().parent().find('td:nth-child(2)');
+      imgTd[0].classList.add("short");
+
+      refreshDiv.classList.add('reload-icon');
+      refreshDiv.classList.add('icon');
+      refreshDiv.style.padding = '33px 0';
+      refreshDiv.style.cursor = 'pointer';
+
+      imgTd[0].innerHTML = '';
+      imgTd[0].append(refreshDiv);
+      refreshDiv.addEventListener("click", function(e) {
+        marketHelper(false, card.uri);
+        refreshDiv.classList.add('glyphicon-refresh-animate')
+      });
+    })
+
+    card.$row.find('td > a').each(function() {
+
+      var nameTd = card.$row.find('td:nth-child(3)');
+      nameTd[0].classList.add("long");
+
+    })
+
+    card.$row.find('td > a').each(function() {
+      var nameLink = card.$row.find('td:nth-child(3) a');
+      $(nameLink[0]).attr("data-openOrders", card.openOrders > 0 ? 'true' : 'false');
+
+    })
+
+    card.$row.find('td > a').each(function() {
+      var ovrTd = card.$row.find('td:nth-child(4)');
+      ovrTd[0].classList.add("short");
+      ovrTd[0].innerHTML = `<img src="${card.shield}" height="16px" width="16px">`;
+    })
+    card.$row.find('td > a').each(function() {
+
+      var buyTd = card.$row.find('td:nth-child(5)');
+      buyTd[0].innerHTML = card.buyNow;
+      buyTd[0].classList.add("long");
+      $(buyTd).attr("data-sort", card.buyNow);
+      if (card.sellable > 0) {
+        buyTd.append(card.sellForm);
+        var sellButton = $(card.sellForm).find("button")[0];
+        sellButton.addEventListener("click", function(){
+          refreshDiv.classList.add('glyphicon-refresh-animate')
+        });
+        sellButton.innerHTML = "+S";
+        sellButton.style.padding = "1px";
+        sellButton.style.height = "100%"
+      }
+      for ( var cancelButton of card.cancelSellButtons ) {
+        $(buyTd).append(cancelButton);
+        cancelButton.target = "helperFrame";
+        cancelButton.addEventListener("click", function(){
+          refreshDiv.classList.add('glyphicon-refresh-animate')
+        });
+      }
+
+      var sellTd = card.$row.find('td:nth-child(6)');
+      sellTd[0].innerHTML = card.sellNow;
+      sellTd[0].classList.add("long");
+      $(sellTd).attr("data-sort", card.sellNow);
+      sellTd.append(card.buyForm);
+      var buyButton = $(card.buyForm).find('button')[0]
+      buyButton.addEventListener("click", function(){
+        refreshDiv.classList.add('glyphicon-refresh-animate')
+      });
+      buyButton.innerHTML = "+B";
+      buyButton.style.padding = "1px";
+      buyButton.style.height = "100%"
+      var buyInput = $(card.buyForm).find("input[name=price]")[0];
+      buyInput.setAttribute('style', "padding: 0px !important; font-size:8pt;");
+      for ( var cancelButton of card.cancelBuyButtons ) {
+        $(sellTd).append(cancelButton);
+        cancelButton.target = "helperFrame";
+        cancelButton.addEventListener("click", function(){
+          refreshDiv.classList.add('glyphicon-refresh-animate')
+        });
+      }
+
+      var i = 0;
+      (() => {
+        // TODO: idk if this is needed
+        return
+        const tds = card.$row.find('>td')
+        const needs = Object.keys(dataPoints).length + 5 - tds.length
+        for (let i = 0; i < needs; i++) {
+          card.$row.append('<td/>')
+        }
+      })()
+      for (const dataPoint in dataPoints){
+        if ( !dataPoints[dataPoint].patronsOnly ||
+          md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
+          md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
+          if ( ! settings.hiddenColumns.includes(dataPoint) ) {
+            card.$row.find('td:nth-child('+(i+7)+')').html( card[dataPoint] );
+            i++;
+          }
+
+        }
+      }
+
+      var brandTd = card.$row.find('td:nth-last-child(2)');
+      $(brandTd).attr("data-sort", brandTd[0].textContent);
+      if(itemType === 'player') {
+        brandTd[0].innerHTML = replaceBulk(brandTd[0].innerHTML, findReplaceSeries);
+      }
+      else if (itemType === 'equipment') {
+        brandTd[0].innerHTML = replaceBulk(brandTd[0].innerHTML, findReplaceBrands);
+      }
+
+
+      //$(theForm).css('width','50%');
+      $(card.buyForm).css('display','flex');
+      $($(card.buyForm).find('input[name=price]')[0]).val(card.winningBuy ? card.sellNow : card.sellNow+1);
+      card.buyForm.target = "helperFrame";
+
+
+      //$(this).parent().append(card.sellForm);
+      //$(theForm).css('width','50%');
+      $(card.sellForm).css('display','flex');
+      $($(card.sellForm).find('input[name=price]')[0]).val(card.winningSell ? card.buyNow : card.buyNow-1);
+      card.sellForm.target = "helperFrame";
+      //$($(this).parent().parent().children()[1]).append("<div class=\"helperDiv\" style=\"background-color:yellow; color:red\"><span class=\"stubs\"> </span> "+thisSellNowPrice+"</div>");
+      firstTime[card.uri] = 1;
+      document.getElementById('helperStubsDiv').innerHTML = card.balanceStr;
+
+
+    })
+  }
+
+  const fetchCard = ( card ) =>
+    fetch(card.uri)
+      .then( r => r.text() )
+      .then( r => {
+        const c = cardData(r, false, card.id)
+        if (c.errors.length > 1) {
+          throw c.errors
+        }
+        return { ...card, ...c }
+      })
+
+  const fetchedCards = cards.map( fetchCard )
+  fetchedCards.forEach( c => c.then(handleCard) )
+  fetchedCards.forEach( c => c.then( sort.refresh.bind(sort) ) )
+
+  Promise.all( fetchedCards )
+    .then( () => {
+        // sort.refresh();
+        if (specificTarget == '' || specificTarget == 'blank' ) {
+          if(onlyOpen) {
+            setRefresh(undefined, 'open');
+          } else if (onlyFavorites) {
+            setRefresh(undefined, 'favorites');
+          } else {
+            setRefresh(undefined, 'favorites');
+            setRefresh(undefined, 'open');
+          }
+        }
+      })
+    // catch
+    // for (var e of card.errors) {
+    //   toastr["error"](e, "ERROR");
+    // }
+
 }
 
 function headerFixer() {
-    var itemType = document.querySelector('.items-results-table thead th:nth-child(3)').textContent.toLowerCase();
+    var itemType = document.querySelector('table thead th:nth-child(3)').textContent.toLowerCase();
 
-    var table_headers = $('.items-results-table thead')[0];
+    var table_headers = $('table thead')[0];
     $(table_headers).find('th:nth-child(1)')[0].classList.add("short");
     $(table_headers).find('th:nth-child(2)')[0].classList.add("short");
     $(table_headers).find('th:nth-child(3)')[0].classList.add("long");
@@ -490,13 +472,13 @@ function headerFixer() {
     }
 
     $(table_headers).find('th:nth-child(1)').attr("data-sort-default", true);
-    
+
     $(table_headers).find('th:nth-child(6)').after(function() {
         var returnString = '';
 
-        
+
                 for (const dataPoint in dataPoints){
-                    if ( !dataPoints[dataPoint].patronsOnly || 
+                    if ( !dataPoints[dataPoint].patronsOnly ||
                         md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                         md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
                             if ( ! settings.hiddenColumns.includes(dataPoint) ) {
@@ -508,7 +490,7 @@ function headerFixer() {
         return returnString;
     });
 
-    
+
     $(document).tooltip();
 }
 
@@ -517,9 +499,8 @@ function orderHelper(onePage = false){
     //toastr.clear();
 
     headerFixer();
-    
 
-    tables = $('.items-results-table tbody')[0];
+    tables = $('table tbody').last()[0];
     if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                   md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
         $(tables).find('tr td:nth-child(6)').after("<td>0</td>".repeat(Object.keys(dataPoints).filter((x) => (!settings.hiddenColumns.includes(x))).length));
@@ -534,7 +515,7 @@ function orderHelper(onePage = false){
     $(tables).find('tr td:nth-child(2) img').attr('src','data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==');
     $(tables).find('tr td:nth-child(1)').each(function(i)
         {
-            $(this).attr("data-sort", $(this).find('.favorites-icon-active').length > 0 ? 1 : 0);
+            $(this).attr("data-sort", $(this).find('.mlb12-heart-solid').length > 0 ? 1 : 0);
         });
 
     //tables.style.display = 'flex';
@@ -544,6 +525,8 @@ function orderHelper(onePage = false){
         try {numPages = parseInt($('.pagination').find('a')[$('.pagination').find('a').length-2].innerText);}
         catch(error) { true; }
     }
+sort = new Tablesort(tables.parentElement, { descending: true });
+return
        // console.log(numPages);
     if(numPages > 10){
     numPages = 10;
@@ -582,7 +565,7 @@ function orderHelper(onePage = false){
             }
             doneNum = doneNum + 1;
             if(doneNum == numPages){
-                sort = new Tablesort(document.getElementsByClassName('items-results-table')[0], { descending: true });
+                sort = new Tablesort(tables.parentElement, { descending: true });
                 marketHelper()
             }
 
@@ -591,7 +574,7 @@ function orderHelper(onePage = false){
     }
     else
     {
-               sort = new Tablesort(document.getElementsByClassName('items-results-table')[0], { descending: true });
+               sort = new Tablesort(tables.parentElement, { descending: true });
                marketHelper();
     }
 
@@ -623,38 +606,49 @@ function setRefresh(interval=undefined, setWhich='favorites') {
 
 
 function go() {
+    if ( window['$'] === undefined || $('table thead').length === 0 ) {
+      console.log("Waiting ... ");
+      setTimeout(go, 200);
+      return
+    }
+    // disable autocomplete
+    Array.from(document.querySelectorAll('input[type=text]')).forEach(el => el.autocomplete = 'off')
+    console.time('community market helper # go')
     'use strict';
-    if( typeof $ !== 'undefined'  && $('.items-results-table thead').length > 0){
-
     //$('.marketplace-main-heading').children()[0].append(" ("+$('.order').length+")");
     //$('.marketplace-main-heading').append('<div style="float:right">Refresh interval: <input id="refresh-interval" size="5" value=".5"></input></div>');
 
+  $('.selected-filters').append('<button class="remove-owned">Remove Owned</button>')
+  $('.remove-owned').on('click', () =>
+    $('tbody:last tr')
+    .filter((i,el) => Number(el.children[8].innerText) >= 1)
+    .remove())
 
     //favoritesTimeout = setTimeout(orderHelper,60000);
 
     var playerIcon = document.createElement('a');
     playerIcon.classList.add('player-icon', 'cm-icon');
     playerIcon.setAttribute('title', 'MLB Players');
-    playerIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=0';
+    playerIcon.href='https://theshownation.com/mlb20/watch_list?type=mlb_card';
     var equipmentIcon = document.createElement('a');
     equipmentIcon.classList.add('equipment-icon', 'cm-icon');
     equipmentIcon.setAttribute('title', 'Equipment');
-    equipmentIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=2';
+    equipmentIcon.href='https://theshownation.com/mlb20/watch_list?type=equipment';
     var stadiumIcon = document.createElement('a');
     stadiumIcon.classList.add('stadium-icon', 'cm-icon');
     stadiumIcon.setAttribute('title', 'Stadiums');
-    stadiumIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=1';
+    stadiumIcon.href='https://theshownation.com/mlb20/watch_list?type=stadium';
     var sponsorshipIcon = document.createElement('a');
     sponsorshipIcon.classList.add('sponsorship-icon', 'cm-icon');
     sponsorshipIcon.setAttribute('title', 'Sponsorships');
-    sponsorshipIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=3';
+    sponsorshipIcon.href='https://theshownation.com/mlb20/watch_list?type=sponsorship';
     var unlockableIcon = document.createElement('a');
     unlockableIcon.classList.add('unlockable-icon', 'cm-icon');
     unlockableIcon.setAttribute('title', 'Unlockables');
-    unlockableIcon.href='https://mlb19.theshownation.com/community_market/favorites?type_id=7';
-    document.querySelector('.layout-heading').append(playerIcon, equipmentIcon, stadiumIcon, sponsorshipIcon, unlockableIcon);
+    unlockableIcon.href='https://theshownation.com/mlb20/watch_list?type=unlockable';
+    document.querySelector('.page-head').append(playerIcon, equipmentIcon, stadiumIcon, sponsorshipIcon, unlockableIcon);
 
-    fetch('https://mlb19.theshownation.com/community_market/shortcuts').then( function(response) {
+    fetch('https://theshownation.com/mlb20/saved_searches').then( function(response) {
         if (response.ok) {
             return response.text()
           } else {
@@ -675,7 +669,7 @@ function go() {
             newLink.classList.add('cm-link');
             newLink.href = link;
             newLink.textContent = title;
-            document.querySelector('.layout-heading').append(newLink);
+            document.querySelector('.page-head').append(newLink);
         });
     }).catch( function(e) {
         console.log(e);
@@ -684,10 +678,11 @@ function go() {
 
     helperFrame = document.createElement('iframe');
     helperFrame.id = 'helperFrame';
-    helperFrame.style.webkitTransform = 'scale(1.5)';
+    helperFrame.style.webkitTransform = 'scale(1)';
     helperFrame.style.transformOrigin = '0 0';
     helperFrame.style.height ='300px';
-    helperFrame.style.width = '500px';
+    helperFrame.style.maxHeight ='300px';
+    helperFrame.style.width = '150px';
     helperFrame.style.zIndex = '99999';
     helperFrame.style.position = 'fixed';
     helperFrame.style.bottom = '1px';
@@ -702,10 +697,10 @@ function go() {
     if (!settings.showBuyFrame ) {
         helperFrame.style.height ='1px';
     }
-    $('.sidebar-section-top-inner').append(helperFrame);
+    $('.layout-secondary').append(helperFrame);
     helperFrame.onload = function(){
                       //  toastr["success"]("Order created","Done!");
-                      
+
                       marketHelper(false, this.contentDocument.location.pathname);
 
 
@@ -723,7 +718,7 @@ function go() {
         if(e.data.hasOwnProperty('itemName'))
          {
             if(settings.webNotifications) {
-                var url = `https://mlb19.theshownation.com/community_market/listings/${e.data.itemId}`
+                var url = `https://theshownation.com/mlb20/items/${e.data.itemId}`
                 fetch(url).
                 then( function(response) {
                 if (response.ok) {
@@ -758,7 +753,7 @@ function go() {
                else if(md5(settings.superSecret) == '2c3005677d594560df2a9724442428d1' ||
                      md5(settings.superSecret) == '68839b25c58e564a33e4bfee94fa4333') {
                    var bgcolor = '';
-   
+
                if ( settings.hotness >= card[settings.heatFactor] && card[settings.heatFactor] > settings.warmness ) {
                    bgcolor = 'rgba('+pickHex(parseFloat( ( ( card[settings.heatFactor] - settings.coolness) / ( settings.hotness - settings.coolness ) ).toFixed(2) ), "hot" ).join()+')';
                }
@@ -768,13 +763,13 @@ function go() {
                    else {
                        bgcolor = 'rgba('+pickHex(parseFloat( ( card[settings.heatFactor] / settings.coolness ).toFixed(2) ) , "cool" ).join()+')';
                    }
-   
-   
+
+
                }
-               
+
                 //$(this).parent().append(card.sellForm);
                 //$(theForm).css('width','50%');
-                
+
                 var cardInfo = document.createElement('span');
                 cardInfo.innerHTML = `${card.profitMargin}<small>±</small> | ${card.roi}<small>ROI</small> | ${card.ppm}<small>PPM</small> | ${card.salesPerHour}<small>S/H</small>`;
                 cardInfo.style.backgroundColor = bgcolor;
@@ -784,29 +779,24 @@ function go() {
                 }
                 bgSpan.append(cardInfo);
                 span.append(bgSpan);
-                
+
                 toastr.info(`${span.outerHTML.replace(/data-value/g,'value')}`, `${e.data.itemName} ${e.data.itemBuyOrSell} for ${e.data.itemPrice}`);
             }).catch(function(e) { console.log(e)});
 
-              
-                
+
+
                 }
              // <a href="/community_market/listings/58972dceed371780056fb58a04f7ce7e" target="blank">Rival</a>
              marketHelper(false, `/community_market/listings/${e.data.itemId}`);
              // console.log(e.data)
          }
-        
+
         return Promise.resolve("Dummy response to keep the console quiet");
     }
-
-} else {
-    console.log("Waiting ... ");
-    setTimeout(go, 200);
+    console.timeEnd('community market helper # go')
 }
 
-    //setTimeout(completedOrders,(1000*15));
-
-
-
-}
 go();
+setInterval(function () {
+  $('button[data-confirm]').removeAttr('data-confirm')
+}, 250)

@@ -38,13 +38,13 @@ function getLinks(b){
     b = $.parseHTML(b);
     //var team = $($(b).find('#team option:selected')[0]).text();
 
-    $(b).find('.completed-orders-table tbody tr').each(function(i){
+    $(b).find('.page-body table tbody tr').each(function(i){
         var item = $(this).find('a')[0];
         var itemName = item.text;
         var itemId = item.href.match(/[^\/]+$/g);
 
         if(!allSales[itemId]){
-            allSales[itemId] = {'name': itemName, 'buys':Array(), 'sells':Array(), 'url': "https://mlb19.theshownation.com/community_market/listings/"+itemId, 'mostRecentBuy': null, 'mostRecentSell': null };
+            allSales[itemId] = {'name': itemName, 'buys':Array(), 'sells':Array(), 'url': "https://theshownation.com/mlb20/items/"+itemId, 'mostRecentBuy': null, 'mostRecentSell': null };
         }
 
         var itemBuyOrSell = $(this).find('td')[1].innerText.match(/([^\s]+)\sfor/)[1];
@@ -87,11 +87,11 @@ var runningTotal=0;
     var runningProfitTotal=0;
 
     var localDataBuys = {};
-            
+
                 if(localStorage.hasOwnProperty('tsn-purchaseHistory')){
                     localDataBuys = JSON.parse(localStorage.getItem('tsn-purchaseHistory'));
                     }
-                 
+
                  localStorage.setItem('tsn-purchaseHistory',JSON.stringify(localDataBuys));
 
     var todayProfitTotal=0;
@@ -109,8 +109,8 @@ var runningTotal=0;
             '<th title="Most recent buy" data-sort-method="number">Δ<sub>BUY</sub></th><th title="Most recent sell" data-sort-default="true" data-sort-method="number">Δ<sub>SELL</sub></th>'+
             '</tr></thead><tbody id="inventory-table-body"></tbody>';
         $(document).tooltip();
-        $('.completed-orders-table').hide();
-    $('.title-widget-main')[0].prepend(table);
+        $('.page-body table').hide();
+    $('.layout-primary').append(table);
     //numPages = parseInt($('.pagination').find('a')[$('.pagination').find('a').length-2].innerText);
         numPages = parseInt(location.search.match(/[^\=]+$/g)) * -1;
         if(numPages==0){numPages = parseInt($('.pagination').find('a')[$('.pagination').find('a').length-2].innerText);}
@@ -118,7 +118,7 @@ var runningTotal=0;
 
     //range.push(-1);
 
-    var baseUrl = 'https://mlb19.theshownation.com/community_market/orders/completed?page=';
+    var baseUrl = 'https://theshownation.com/mlb20/orders/completed_orders?page=';
     var fragment = document.createDocumentFragment();
     range.forEach(function(i){
         if(i!=0){
@@ -128,10 +128,10 @@ var runningTotal=0;
 
             getLinks(b);
             doneNum = doneNum + 1;
-            
+
             if(doneNum == numPages - 1){
             //console.log(allSales);
-            
+
                 for (var key in allSales){
                     var i = allSales[key];
                     var numBuys = i.buys.length;
@@ -165,7 +165,7 @@ var runningTotal=0;
                 console.log(runningTotal);
                 var small = document.createElement('small');
                 small.innerHTML = "("+runningProfitTotal+" total | "+todayTotal+" today)"
-                $('.title-layout-heading').children()[0].append(small);
+                $('.layout-primary').children()[0].append(small);
 
             }
 
@@ -177,7 +177,7 @@ var runningTotal=0;
     }
     else
     {
-        $($('.title-layout-heading').children()[0]).append("<small> [ <a href=\"https://mlb19.theshownation.com/community_market/orders/completed?page=0\"> History </a> ]</small>");
+        $($('.page-body').children()[0]).append("<small> [ <a href=\"https://theshownation.com/mlb20/orders/completed_orders?page=0\"> History </a> ]</small>");
     }
 
 })();
