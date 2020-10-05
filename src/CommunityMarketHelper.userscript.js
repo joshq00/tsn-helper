@@ -525,8 +525,8 @@ function orderHelper(onePage = false){
         try {numPages = parseInt($('.pagination').find('a')[$('.pagination').find('a').length-2].innerText);}
         catch(error) { true; }
     }
-sort = new Tablesort(tables.parentElement, { descending: true });
-return
+// sort = new Tablesort(tables.parentElement, { descending: true });
+// return
        // console.log(numPages);
     if(numPages > 10){
     numPages = 10;

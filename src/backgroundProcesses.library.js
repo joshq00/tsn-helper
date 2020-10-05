@@ -283,12 +283,14 @@ function openOrdersCheck() {
     }
 
 }
+
 var openOrdersInterval = setInterval(openOrdersCheck,20000);
 
 var doneInitial = false;
 function initialStubsCheck() {
     if (typeof $ !== "undefined" ) {
-        var url = 'https://theshownation.com/mlb20/dashboard';
+        // var url = 'https://theshownation.com/mlb20/dashboard';
+        var url = 'https://theshownation.com/mlb20/shop/packs';
         $.ajax({url:url}).done(function(b){
             b = b.replace(/<img([^>]*)\ssrc=(['"])([^'"]+)\2/gi, "<img$1 src=$2data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7$2 data-src=$2$3$2");
             // console.log(b);
@@ -296,13 +298,17 @@ function initialStubsCheck() {
             // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/logos/logo2_wsh.png','https://s3.amazonaws.com/mlb17-shared/dist/7/img_teams/cap/logo2_wsh.png');
             // b = b.replace('https://s3.amazonaws.com/mlb-theshownation/tsn18/4/img/actionshots/3785374b5e5df43203dc02054105cf58.jpg','https://s3.amazonaws.com/mlb-theshownation/tsn18/3/img/shared/default-actionshot.jpg');
             b = $.parseHTML(b);
-            balanceAmt = parseInt($(b).find('div.well.stubs')[0].textContent.replace(/[^\d]/gi,''));
-            balancePlusBuysAmt = balanceAmt + buysAmount;
-            localStorage.setItem('tsn-balanceAmt',balanceAmt);
-            localStorage.setItem('tsn-balancePlusBuysAmt',balancePlusBuysAmt);
-            chrome.runtime.sendMessage(extensionId, {"balanceAmt": balanceAmt, "balancePlusBuysAmt": balancePlusBuysAmt}, function(response) {
-                console.log(response.msg);
-            });
+            try {
+                balanceAmt = parseInt($(b).find('div.well.stubs')[0].textContent.replace(/[^\d]/gi,''));
+                balancePlusBuysAmt = balanceAmt + buysAmount;
+                localStorage.setItem('tsn-balanceAmt',balanceAmt);
+                localStorage.setItem('tsn-balancePlusBuysAmt',balancePlusBuysAmt);
+                chrome.runtime.sendMessage(extensionId, {"balanceAmt": balanceAmt, "balancePlusBuysAmt": balancePlusBuysAmt}, function(response) {
+                    console.log(response.msg);
+                });
+            } catch (e) {
+                console.log(e)
+            }
         });
         if(!doneInitial){
             doneInitial = true;

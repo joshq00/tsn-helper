@@ -133,16 +133,34 @@ document.addEventListener('keyup', refresher.touch )
 document.addEventListener('click', refresher.touch )
 document.addEventListener('scroll', refresher.touch )
 
+let captchad = false
 setInterval( () => {
   if (document.querySelectorAll('div[style*=visible] iframe[title^=recaptcha]').length == 0) {
+    captchad = false
     document.title = document.title.replace(/CAP\s+/,'')
     return
   }
   document.title = 'CAP ' + document.title.replace(/CAP\s+/,'')
   refresher.touch()
 
+  if (captchad == false) {
+    captchad = true
+    new Notification('captcha', {body: 'cap!'})
+    setTimeout( () =>
+      document.querySelector('div[style*=visible] iframe[title^=recaptcha]').scrollIntoView(),
+      1000 )
+  }
 
 }, 500)
+
+
+setTimeout( () => {
+    // if (window.scrollY || window.outerHeight > 250) {return}
+    if (window.outerHeight > 300) {return}
+    // document.querySelector('h1').scrollIntoView()
+    // window.scrollTo(0, document.querySelector('h1').offsetTop - window.innerHeight)
+  document.querySelector('#create-buy-order-form').scrollIntoView()
+}, 2500)
 
 const run = () => {
   'use strict';
@@ -215,7 +233,7 @@ const run = () => {
         return getSellNow()
       },
       get sellOrders() {
-        return getSells()
+        return getSells().sort( (a,b) => a < b )
       },
       get winningSell() {
         const sells = this.sellOrders
@@ -228,7 +246,7 @@ const run = () => {
         return Math.max(...buys) >= this.sellNow
       },
       get buyOrders() {
-        return getBuys()
+        return getBuys().sort( (a,b) => a > b )
       },
       get profit () {
         return ((this.buyNow * .9) - this.sellNow)
@@ -258,10 +276,24 @@ const run = () => {
           .catch( err => {
             document.title = `!!${document.title}`
             console.error(err)
-            // document.location.reload()
+            document.location.reload()
           } )
         // let cardp = resp.then( () => cardData(doc, true) )
         // cardp.then( cd => window.card = cd )
+      },
+      get allBuys() {
+        return Array.from(
+          document.querySelectorAll(
+            '#table-buy-now tr td:last-child'))
+          .map( tr => tr.innerText.replace( /[^\d]/g, '' ) )
+          .map( v => parseInt(v) ).sort( (a, b) => a < b )
+      },
+      get allSells() {
+        return Array.from(
+          document.querySelectorAll(
+            '#table-sell-now tr td:last-child'))
+          .map( tr => tr.innerText.replace( /[^\d]/g, '' ) )
+          .map( v => parseInt(v) ).sort( (a, b) => a > b )
       },
     }
   }
@@ -313,6 +345,11 @@ const run = () => {
   }
 
   const smartBuy = (max) => {
+    const cancelBuys = () => {
+      Array.from($('tr[id^=buy-order] form[action*=cancel] button'))
+        .forEach( btn => btn.click() )
+    }
+
     addNote(`smartBuy(${max}, ${config.maxQuantity || 0})`, (e) => {
       localStorage.setItem(document.location.pathname.split('/').slice(-1)[0], JSON.stringify({
         ...getConfig(),
@@ -328,6 +365,37 @@ const run = () => {
       return false
     }
 
+    // buy price is too high
+    if ( thisCard.sellNow >= max ) {
+      // cancelBuys()
+      return false
+    }
+
+    // buy now price is good!
+    // buy now!
+    if ( thisCard.buyNow < max ) {
+      cancelBuys()
+      setTimeout( () => {
+        $('form[action$=buy_now] button').click()
+        // alert( 'someone messed up! buy now!' )
+      }, 100)
+      return true
+    }
+
+    // don't overpay
+    // if we are paying more than 100 over the
+    // next offer, adjust our offer
+    if ( thisCard.winningBuy ) {
+      const nextBest = Math.max( ...thiscard.allSells.slice(1) )
+      const myBuy = Math.max( ...thiscard.buyOrders )
+      if ( myBuy - nextBest > 100 ) {
+        cancelBuys()
+        thisCard.buyFor( nextBest + 1 )
+        return true
+      }
+    }
+
+    // already winning
     if (thisCard.winningBuy) {
       Array.from($('tr[id^=buy-order]'))
         .filter( tr => Number(tr.children[2].innerText.replace(/[^\d]/g,'')) < thisCard.sellNow)
@@ -336,12 +404,8 @@ const run = () => {
       return false
     }
 
-    if ( thisCard.sellNow >= max ) {
-      return false
-    }
-
-    setTimeout(function () {
-      if (thisCard.buyOrders.length > 1) {
+    // setTimeout(function () {
+      if (thisCard.buyOrders.length >= 1) {
         Array.from($('tr[id^=buy-order]'))
           .filter( tr => Number(tr.children[2].innerText.replace(/[^\d]/g,'')) < thisCard.sellNow)
           .slice(-1)
@@ -352,17 +416,47 @@ const run = () => {
       if (stubs >= getConfig().maxPrice) {
         buyIt()
       }
-    }, 250)
+    // }, 250)
     return true
   }
 
   const smartSell = (min) => {
+    const cancelSells = () => {
+      Array.from(
+          document.querySelectorAll('form[method=post][action*=sell][action*=cancel] button')
+      ).forEach( btn => btn.click() )
+    }
+
     if (thisCard.sellable <= 0) { return false }
 
-    // already own enough
+    // must keep N cards
     if (thisCard.owned <= config.minQuantity) {
       console.log(`must keep ${config.minQuantity}`)
       return false
+    }
+
+    // sell now price is good!
+    // sell now!
+    if ( thisCard.sellNow > min ) {
+      cancelSells()
+      setTimeout( () => {
+        $('form[action$=sell_now] button').click()
+        // alert( 'someone messed up! sell now!' )
+      }, 100)
+      return true
+    }
+
+    // don't undersell
+    // if we are selling less than 100 compared to the
+    // next offer, adjust our offer
+    if ( thisCard.winningSell ) {
+      const nextBest = Math.min( ...thiscard.allBuys.slice(1) )
+      const mySell = Math.min( ...thiscard.sellOrders )
+      if ( nextBest - mySell > 100 ) {
+        cancelSells()
+        thisCard.sellFor( nextBest - 1 )
+        return true
+      }
     }
 
     const sells = thisCard.sellOrders
@@ -376,8 +470,7 @@ const run = () => {
     }
 
     if ( thisCard.buyNow < min ) {
-      Array.from($('tr[id^=sell-order] form[action*=cancel] button'))
-        .forEach( btn => btn.click() )
+      // cancelSells()
       return false
     }
 
@@ -395,8 +488,8 @@ const run = () => {
       )
       return false
     }
-    setTimeout(() => {
-      if (thisCard.sellOrders.length > 1 || thisCard.sellable == 1) {
+    // setTimeout(() => {
+      if (thisCard.sellOrders.length >= 1 || thisCard.sellable == 1) {
         Array.from($('tr[id^=sell-order]'))
           .filter( tr => Number(tr.children[2].innerText.replace(/[^\d]/g,'')) > getBuyNow())
           .slice(-1)
@@ -404,7 +497,7 @@ const run = () => {
           .forEach( btn => btn.click() )
       }
       sellIt()
-    }, 250)
+    // }, 250)
     return true
   }
 
@@ -491,6 +584,8 @@ const run = () => {
 
     // buy specified quantity
     ;(function () {
+      // TODO: old buy bulk
+      return
       /*
       localStorage.setItem('buy', document.location.pathname.split('/').slice(-1)[0])
       localStorage.setItem('buyquantity', 25)
@@ -512,14 +607,61 @@ const run = () => {
       document.location.hash = '#disable'
     })();
 
+    // buy specified quantity
     ;(function () {
+      if (! config.buyBulk) { return }
+      const { buyBulkQuantity, buyBulkPrice } = config
+
+      addNote(`bulkBuy(${buyBulkPrice || 0}, ${buyBulkQuantity})`, (e) => {
+        localStorage.setItem(document.location.pathname.split('/').slice(-1)[0], JSON.stringify({
+          ...getConfig(),
+          player: thisCard.name,
+          buyBulk: false,
+        }))
+        $(e.target).remove()
+      })
+
+
+      const buyOrders = document.querySelectorAll('tr[id^=buy-order-]').length
+      const current = buyOrders + thisCard.sellable
+      if (current >= buyBulkQuantity) {
+
+        localStorage.setItem(document.location.pathname.split('/').slice(-1)[0], JSON.stringify({
+          ...getConfig(),
+          player: thisCard.name,
+          buyBulk: false,
+        }))
+        return
+      }
+
+      // const offer = Number(localStorage.getItem('buyfor'))
+      const offer = thisCard.winningBuy ?
+        thisCard.sellNow :
+        config.buyBulkPrice >= thisCard.sellNow ? thisCard.sellNow + 1 : config.buyBulkPrice
+      // let buyInterval = null
+      // buyInterval = setInterval( () => {
+        // if ( document.querySelector('iframe[title^=recaptcha]') == null ) { return }
+        // clearInterval( buyInterval )
+      setTimeout( () => {
+        console.log( "want to buy for", offer )
+        if (isNaN(offer) || offer <= 0) { buyIt() } else { buyFor(offer) }
+      }, 500)
+    })();
+
+    ;(function () {
+      const { buyBulkQuantity, buyBulkPrice } = config
       const buybulkform = $(`
           <form id="buy-bulk" class="title-form" accept-charset="UTF-8" method="get">Buy in Bulk
           <div class="inline-form">
           <div class="form-block">
           <input type="hidden" name="buy" value="${document.location.pathname.split('/').slice(-1)[0]}" />
-          <input type="text" autocomplete="off" name="buyquantity" placeholder="Quantity (cur ${document.querySelectorAll('tr[id^=buy-order-]').length})" />
-          <input type="text" autocomplete="off" name="buyfor" placeholder="Price (opt)" />
+          <input type="text" autocomplete="off" name="buyquantity"
+            placeholder="Quantity (cur ${document.querySelectorAll('tr[id^=buy-order-]').length})"
+            value="${ buyBulkQuantity || '' }"
+            />
+          <input type="text" autocomplete="off" name="buyfor" placeholder="Price (opt)"
+            value="${ buyBulkPrice || '' }"
+             />
           </div>
           <div class="form-block">
           <button name="button" class="title-button">Buy</button>
@@ -527,15 +669,27 @@ const run = () => {
           </div>
           </form>`)
       $('.market-forms-wrapper:has(form[action*=create_buy_order]) .market-forms-price').append(buybulkform)
+
       buybulkform.on('submit', (e) => {
         e.preventDefault()
-        Array.from(buybulkform.find('input')).forEach( inp => {
-          localStorage.setItem(inp.name, inp.value)
-        })
-        // waitForElement()
-        document.location.reload()
+        // Array.from(buybulkform.find('input')).forEach( inp => {
+        //   localStorage.setItem(inp.name, inp.value)
+        // })
+        // // waitForElement()
+        // document.location.reload()
+
+        localStorage.setItem(document.location.pathname.split('/').slice(-1)[0], JSON.stringify({
+          ...getConfig(),
+          player: thisCard.name,
+          buyBulk: true,
+          buyBulkQuantity: Number(buybulkform.find('input[name=buyquantity]').val()) || 0,
+          buyBulkPrice: Number(buybulkform.find('input[name=buyfor]').val()),
+        }))
+
+        refresher.refresh( () => thecard.refresh() )
       })
     })();
+
     ;(function () {
       const sellallform = $(`
           <form id="sell-all" class="title-form" accept-charset="UTF-8" method="get">Sell All
@@ -619,21 +773,21 @@ const run = () => {
       })
     })();
     const { hash } = document.location
-    if (hash.startsWith('#disable')) {
-      if (hash.endsWith('sell')) {
-        setTimeout(sellIt, 5)
-      }
-      if (hash.endsWith('buy')) {
-        setTimeout(buyIt, 5)
-      }
-      if (hash.endsWith('buy-1000')) {
-        setTimeout(() => buyFor(1001), 5)
-      }
-      if (hash.endsWith('buy-6')) {
-        setTimeout(() => buyFor(6), 5)
-      }
-      return
-    }
+    // if (hash.startsWith('#disable')) {
+    //   if (hash.endsWith('sell')) {
+    //     setTimeout(sellIt, 5)
+    //   }
+    //   if (hash.endsWith('buy')) {
+    //     setTimeout(buyIt, 5)
+    //   }
+    //   if (hash.endsWith('buy-1000')) {
+    //     setTimeout(() => buyFor(1001), 5)
+    //   }
+    //   if (hash.endsWith('buy-6')) {
+    //     setTimeout(() => buyFor(6), 5)
+    //   }
+    //   return
+    // }
 
     if(typeof cardData === "undefined" && typeof settings === "undefined" && typeof $ === "undefined" && document.getElementsByTagName('body').length > 0){
       console.log("Still not set");
@@ -910,7 +1064,21 @@ const run = () => {
 }
 
 (function() {
-  try { run() } catch (e) { console.log(e); setTimeout(window.location.reload, 2500) }
+  let interval = setInterval( () => {
+    if (document.querySelector('form[action*=buy]') == null) {
+      return
+    }
+    try {
+      run()
+    } catch (e) {
+      clearInterval( interval )
+      console.log(e);
+      setTimeout(() => window.location.reload(), 2500);
+      return
+    }
+    clearInterval( interval )
+
+  }, 50)
   function plainkeyup (e) {
     if (e.target.tagName.toUpperCase() == 'INPUT') { return }
     let disabled = document.location.hash === '#disable'

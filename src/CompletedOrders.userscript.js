@@ -114,6 +114,7 @@ var runningTotal=0;
     //numPages = parseInt($('.pagination').find('a')[$('.pagination').find('a').length-2].innerText);
         numPages = parseInt(location.search.match(/[^\=]+$/g)) * -1;
         if(numPages==0){numPages = parseInt($('.pagination').find('a')[$('.pagination').find('a').length-2].innerText);}
+    numPages = Math.min( 250, numPages )
     var range = Array.apply(null, Array(numPages)).map(function (_, i) {return i;});
 
     //range.push(-1);

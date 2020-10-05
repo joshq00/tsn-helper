@@ -5,6 +5,7 @@ button.title-button {
 }
 .page-head-items, .page-head-items .section-items {
   background-image: none !important;
+  background-color: black !important;
   box-shadow: none !important;
 }
 .page-wrap-items .page-head-items .section-items-secondary /* stat section */
@@ -14,11 +15,11 @@ button.title-button {
 .player-stat-tables .player-info-usedin, /* used in */
 footer { display: none; }
 .section-items {
-  background: white;
+  /* background: white; */
   box-shadow: none;
 }
 .page-body-items .mlb20-card-topps,
-.page-body-items .section-market-info,
+.page-body-items .section-market-info, /* sales numbers */
 .referer-inner /* stupid 'go back' */
 {
   display: none !important;

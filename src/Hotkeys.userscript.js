@@ -10,12 +10,50 @@
 // ==/UserScript==
 
 
+const getPosition = (w,h) => n => {
+  const rows = Math.floor(1024 / h)
+  let row = n % rows
+  let col = Math.floor( n / rows )
+  return ({
+    width: w,
+    height: h,
+    left: col * w,
+    top: row * h + 25,
+  })
+}
+let reloadSmarts = undefined
 function doc_keyUp(e) {
   if (e.target.tagName.toUpperCase() != 'INPUT')
   {
     console.log(e.key);
     switch(e.key)
     {
+      case '*': // open smart orders
+        // list all players with configs active smart buy/sell
+        let wHeight = 250
+        let wWidth = 250
+        let posCalc = getPosition(wWidth, wHeight)
+        clearInterval( reloadSmarts )
+
+        let run = () =>
+          Object.entries(localStorage)
+            .filter(([k,v])=> (/^[a-f0-9]{32}$/).test(k)).map(([k,v]) => ({ id: k, ...JSON.parse(v) }))
+            .filter(({smartBuy, smartSell}) => smartBuy || smartSell).map(({id, player}) => ({id, player}) )
+            .forEach( (item, n) => {
+              console.log( `opening ${item.player}` )
+              let w = window.open(
+                `${window.location.origin}/mlb20/items/${item.id}`,
+                item.player,
+                Object.entries(posCalc(n)).map( ([k,v]) => `${k}=${encodeURIComponent(v)}` ).join(',')
+              )
+            } )
+        run()
+        reloadSmarts = setInterval( run, 1000 * 60 * 10 )
+
+        // let dorefresh = () => window.open('https://theshownation.com/mlb20/items/5985e72b3752e4749926885db1b45be4#disable-sell', 'renewcap', `width=100,height=100,top=0,left=${wWidth}`)
+        // dorefresh()
+        // setInterval(dorefresh, 1000 * 30)
+        break
       case 'o': // o goes to orders
         window.location.href = 'https://theshownation.com/mlb20/orders/open_orders';
         break;
@@ -38,6 +76,9 @@ function doc_keyUp(e) {
         break;
       case 'p': // p goes to packs
         window.location.href = 'https://theshownation.com/mlb20/packs';
+        break;
+      case 'd': // d goes to shop packs
+        window.location.href = 'https://theshownation.com/mlb20/shop/packs';
         break;
       case 'r': // r refreshes
         window.location.reload();

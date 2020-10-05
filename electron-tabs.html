@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>electron-tabs-demo</title>
+    <link rel="stylesheet" href="node_modules/electron-tabs/electron-tabs.css">
+
+  </head>
+  <body style="margin:0">
+
+<style>
+  webview {
+    flex: 1
+  }
+</style>
+    <div style="
+    display: flex;
+    flex-flow: wrap;
+    height: 100vh;
+    ">
+      <!-- <webview src="https://theshownation.com/mlb20/dashboard" -->
+      <!--          disablewebsecurity -->
+      <!--          style=" -->
+      <!--          width: 33%; -->
+      <!--          display: flex; -->
+      <!--          "></webview> -->
+      <!-- <webview src="https://theshownation.com/mlb20/items/87602fc8d5b4989b1fda114b7b4b597c" -->
+      <!--          disablewebsecurity -->
+      <!--          style=" -->
+      <!--          width: 33%; -->
+      <!--          display: flex; -->
+      <!--          "></webview> -->
+      <!-- <webview src="https://theshownation.com/mlb20/items/87602fc8d5b4989b1fda114b7b4b597c" -->
+      <!--          disablewebsecurity -->
+      <!--          style=" -->
+      <!--          width: 33%; -->
+      <!--          display: flex; -->
+      <!--          "></webview> -->
+      <!-- <webview src="https://theshownation.com/mlb20/items/87602fc8d5b4989b1fda114b7b4b597c" -->
+      <!--          disablewebsecurity -->
+      <!--          style=" -->
+      <!--          width: 33%; -->
+      <!--          display: flex; -->
+      <!--          "></webview> -->
+      <!-- <webview src="https://theshownation.com/mlb20/items/87602fc8d5b4989b1fda114b7b4b597c" -->
+      <!--          preload="./preload.js" -->
+      <!--          style=" -->
+      <!--          "></webview> -->
+      <webview id="dash" src="https://ca.account.sony.com/api/v1/oauth/authorize?service_entity=urn:service-entity:psn&response_type=code&client_id=d5e83b44-9f4f-45be-8479-451134e3c9b0&redirect_uri=https://theshownation.com/sessions/oauth&scope=psn:s2s"
+               partition="persist:blah"
+               style="
+               "></webview>
+      <webview
+        class="card"
+        src="https://theshownation.com/mlb20/items/87602fc8d5b4989b1fda114b7b4b597c#maxPrice=14000,maxQuantity=6,minPrice=15555,minQuantity=1"
+        preload="./preload.js"
+        partition="persist:blah"
+        style="
+        "></webview>
+    </div>
+  <script>
+    document.querySelector('#dash')
+  // .addEventListener( 'will-navigate', (e, url) => {
+  .addEventListener( 'did-finish-load', (e) => {
+    const el = document.querySelector('#dash')
+    const url = el.src
+    if (url.startsWith('https://theshownation.com/dashboard')) {
+      el.remove()
+      document.querySelectorAll('webview.card').forEach( el => {
+        el.reload()
+      })
+    }
+  })
+    document.querySelectorAll('webview.card').forEach( el => {
+      setTimeout( () => el.openDevTools(), 1000 )
+      el.addEventListener('dom-ready', () => {
+        el.send('ping', 'hey')
+      })
+
+      el.addEventListener('ipc-message', (event) => {
+        console.log(event.channel)
+      })
+
+      el.addEventListener('new-window', async (e) => {
+        const { shell } = require('electron')
+        const protocol = require('url').parse(e.url).protocol
+        if (protocol === 'http:' || protocol === 'https:') {
+          await shell.openExternal(e.url)
+        }
+      })
+
+      el.addEventListener('load-commit', ( url, isMainFrame ) => {
+        el.insertCSS(`
+        button { padding: 0 !important; }
+        h2 {
+          font-size: 12px;
+          margin: 0;
+          padding: 0;
+        }
+        .inline-form seller-tax,
+        p, footer,
+        .global-header,
+        .tsn-subnav,
+        .tsn-subnav-sm,
+        .well.stubs,
+        .page-head-items
+        {
+          display: none !important;
+        }
+        `)
+      })
+
+      // el.executeJavaScript(``)
+    } )
+  </script>
+
+  <!--
+    <div class="etabs-tabgroup">
+      <div class="etabs-tabs"></div>
+      <div class="etabs-buttons"></div>
+    </div>
+    <div class="etabs-views"></div>
+
+    <script type="text">
+      //const TabGroup = require('electron-tabs') normally but for demo :
+      const TabGroup = require("electron-tabs");
+
+  let tabGroup = new TabGroup({
+    newTab: {
+      title: 'Dashboard',
+      src: 'https://theshownation.com/mlb20/orders/open_orders',
+      badge: 'b1n1',
+    }
+  });
+
+  let t = tabGroup.addTab({
+    title: 'Dashboard',
+    src: 'https://theshownation.com/mlb20/dashboard',
+    active: true
+  })
+t.on("webview-ready", (tab) => {
+  tab.webview.openDevTools();
+});
+  tabGroup.addTab({
+    title: 'Orders',
+    src: 'https://theshownation.com/mlb20/orders/open_orders',
+  });
+
+
+    </script>
+    -->
+  </body>
+</html>
+/* displdisplay: flex;

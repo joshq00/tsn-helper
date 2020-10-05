@@ -1,0 +1,29 @@
+{
+  "name": "tsn-helper",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron main.js",
+    "package": "npm run package-osx",
+    "package-osx": "electron-packager . --overwrite --platform=darwin --arch=x64 --icon=src/icons/48.icns --prune=true --out=release-builds",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/joshq00/tsn-helper.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/joshq00/tsn-helper/issues"
+  },
+  "homepage": "https://github.com/joshq00/tsn-helper#readme",
+  "devDependencies": {
+    "electron": "^10.1.1",
+    "electron-packager": "^15.1.0"
+  },
+  "dependencies": {
+    "electron-tabs": "^0.15.0"
+  }
+}
