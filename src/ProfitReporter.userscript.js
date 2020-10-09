@@ -138,6 +138,9 @@ setInterval( () => {
   if (document.querySelectorAll('div[style*=visible] iframe[title^=recaptcha]').length == 0) {
     captchad = false
     document.title = document.title.replace(/CAP\s+/,'')
+    if (window.outerWidth == 500) {
+      window.resizeTo(250, 250)
+    }
     return
   }
   document.title = 'CAP ' + document.title.replace(/CAP\s+/,'')
@@ -146,6 +149,7 @@ setInterval( () => {
   if (captchad == false) {
     captchad = true
     new Notification('captcha', {body: 'cap!'})
+    window.resizeTo(500, 500)
     setTimeout( () =>
       document.querySelector('div[style*=visible] iframe[title^=recaptcha]').scrollIntoView(),
       1000 )
@@ -644,7 +648,9 @@ const run = () => {
         // clearInterval( buyInterval )
       setTimeout( () => {
         console.log( "want to buy for", offer )
-        if (isNaN(offer) || offer <= 0) { buyIt() } else { buyFor(offer) }
+        // refresher.refresh( () => {
+          if (isNaN(offer) || offer <= 0) { buyIt() } else { buyFor(offer) }
+        {/* }) */}
       }, 500)
     })();
 

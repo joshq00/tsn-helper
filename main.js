@@ -9,7 +9,7 @@ const login = async () => {
   const win = new BrowserWindow({
     width: 600,
     height: 500,
-    show: false,
+    // show: false,
     webPreferences: {
       nodeIntegration: false,
     },
@@ -20,12 +20,14 @@ const login = async () => {
     if (url.startsWith('https://theshownation.com/dashboard')) {
       console.log('will-redir preventing', e)
       resolve()
-      return
+      // return
       e.preventDefault()
       win.close()
     }
   })
-    win.loadURL('https://ca.account.sony.com/api/v1/oauth/authorize?service_entity=urn:service-entity:psn&response_type=code&client_id=d5e83b44-9f4f-45be-8479-451134e3c9b0&redirect_uri=https://theshownation.com/sessions/oauth&scope=psn:s2s')
+    // win.loadURL('https://ca.account.sony.com/api/v1/oauth/authorize?service_entity=urn:service-entity:psn&response_type=code&client_id=d5e83b44-9f4f-45be-8479-451134e3c9b0&redirect_uri=https://theshownation.com/sessions/oauth&scope=psn:s2s')
+    // win.loadURL('https://theshownation.com/mlb20/dashboard')
+    win.loadURL('https://auth.api.sonyentertainmentnetwork.com/2.0/oauth/authorize?service_entity=urn:service-entity:psn&response_type=code&client_id=d5e83b44-9f4f-45be-8479-451134e3c9b0&redirect_uri=https://theshownation.com/sessions/oauth&scope=psn:s2s')
     // .then( resolve )
   })
   return prom
